@@ -1,0 +1,3259 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HyperReader | 开放链接阅读工作台</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #f7f4ee;
+      --paper: #fffdf7;
+      --panel: #f0eee7;
+      --ink: #242321;
+      --muted: #6a665f;
+      --soft: #8e877e;
+      --line: #d8d1c4;
+      --line-strong: #b8afa0;
+      --green: #21745c;
+      --green-soft: #dcebe4;
+      --blue: #245e8f;
+      --blue-soft: #dce8f2;
+      --rust: #a85632;
+      --rust-soft: #f0e1d8;
+      --violet: #6f527f;
+      --violet-soft: #eadfed;
+      --gold: #a77a22;
+      --danger: #b64848;
+      --shadow: 0 18px 40px rgba(49, 43, 34, 0.12);
+      --radius: 8px;
+      --sidebar: 248px;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(90deg, rgba(36, 94, 143, 0.07) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(168, 86, 50, 0.05) 1px, transparent 1px),
+        var(--bg);
+      background-size: 42px 42px;
+      color: var(--ink);
+      font-family: ui-serif, Georgia, "Songti SC", "Noto Serif CJK SC", serif;
+      font-size: 15px;
+      line-height: 1.55;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      color: inherit;
+    }
+
+    a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: var(--sidebar) minmax(0, 1fr);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 18px 14px;
+      background: rgba(255, 253, 247, 0.88);
+      border-right: 1px solid var(--line);
+      backdrop-filter: blur(18px);
+      overflow-y: auto;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      padding: 4px 4px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: var(--ink);
+      color: var(--paper);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+    }
+
+    .brand-title {
+      display: grid;
+      gap: 1px;
+    }
+
+    .brand-title strong {
+      font-size: 18px;
+      line-height: 1.1;
+    }
+
+    .brand-title span {
+      color: var(--muted);
+      font-size: 12px;
+      font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+    }
+
+    .nav-block {
+      display: grid;
+      gap: 5px;
+    }
+
+    .nav-label {
+      padding: 0 8px 3px;
+      color: var(--soft);
+      font-size: 11px;
+      font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .nav-item {
+      width: 100%;
+      min-height: 40px;
+      display: grid;
+      grid-template-columns: 22px 1fr auto;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+      padding: 8px 9px;
+      text-align: left;
+      cursor: pointer;
+      color: var(--muted);
+      font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+    }
+
+    .nav-item:hover {
+      border-color: var(--line);
+      background: rgba(255, 255, 255, 0.62);
+      color: var(--ink);
+    }
+
+    .nav-item.active {
+      background: var(--ink);
+      color: var(--paper);
+      border-color: var(--ink);
+    }
+
+    .count {
+      min-width: 24px;
+      height: 22px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 99px;
+      background: rgba(36, 35, 33, 0.08);
+      color: inherit;
+      font-size: 12px;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    .nav-item.active .count {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .source-strip {
+      display: grid;
+      gap: 8px;
+      padding: 10px 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 253, 247, 0.62);
+    }
+
+    .source-row {
+      display: grid;
+      grid-template-columns: 9px 1fr auto;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    .main {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto auto;
+      gap: 12px;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(247, 244, 238, 0.9);
+      backdrop-filter: blur(18px);
+    }
+
+    .search {
+      min-width: 0;
+      position: relative;
+    }
+
+    .search i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--soft);
+    }
+
+    .search input {
+      width: 100%;
+      height: 42px;
+      padding: 0 14px 0 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      color: var(--ink);
+      outline: none;
+      font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+    }
+
+    .search input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(36, 94, 143, 0.12);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .locale-select {
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      padding: 0 9px;
+      color: var(--muted);
+      font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+      font-size: 13px;
+    }
+
+    .locale-select select {
+      max-width: 150px;
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      outline: none;
+      font: inherit;
+    }
+
+    .btn,
+    .icon-btn,
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      color: var(--ink);
+      cursor: pointer;
+      font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+      transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .btn {
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 0 12px;
+      font-size: 14px;
+    }
+
+    .btn:hover,
+    .icon-btn:hover,
+    .chip:hover {
+      border-color: var(--line-strong);
+      transform: translateY(-1px);
+    }
+
+    .btn.primary {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: var(--paper);
+    }
+
+    .btn.green {
+      background: var(--green);
+      border-color: var(--green);
+      color: white;
+    }
+
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+    }
+
+    .chip {
+      min-height: 32px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .chip.on {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: var(--paper);
+    }
+
+    .content {
+      min-width: 0;
+      padding: 18px 20px 28px;
+    }
+
+    .view {
+      display: none;
+      gap: 16px;
+    }
+
+    .view.active {
+      display: grid;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .metric {
+      min-height: 92px;
+      display: grid;
+      align-content: space-between;
+      gap: 10px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 253, 247, 0.82);
+      box-shadow: 0 8px 24px rgba(49, 43, 34, 0.06);
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 12px;
+      font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+    }
+
+    .metric strong {
+      font-size: 28px;
+      line-height: 1;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(310px, 0.7fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 253, 247, 0.92);
+      box-shadow: 0 8px 24px rgba(49, 43, 34, 0.06);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      min-height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(240, 238, 231, 0.62);
+    }
+
+    .panel-head h2,
+    .panel-head h3 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.2;
+    }
+
+    .panel-head small {
+      color: var(--muted);
+      font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+    }
+
+    .panel-body {
+      padding: 14px;
+    }
+
+    .feed {
+      display: grid;
+      gap: 10px;
+    }
+
+    .article-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .article-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--line-strong);
+      box-shadow: var(--shadow);
+    }
+
+    .article-card.selected {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(33, 116, 92, 0.12);
+    }
+
+    .meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+    }
+
+    .article-title {
+      margin: 0 0 7px;
+      font-size: 20px;
+      line-height: 1.25;
+    }
+
+    .summary {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .tag-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 8px;
+      border-radius: 99px;
+      background: var(--panel);
+      color: var(--muted);
+      font-size: 12px;
+      font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+    }
+
+    .tag.blue {
+      background: var(--blue-soft);
+      color: var(--blue);
+    }
+
+    .tag.green {
+      background: var(--green-soft);
+      color: var(--green);
+    }
+
+    .tag.rust {
+      background: var(--rust-soft);
+      color: var(--rust);
+    }
+
+    .score-stack {
+      width: 136px;
+      display: grid;
+      gap: 8px;
+      align-content: center;
+    }
+
+    .mini-score {
+      display: grid;
+      gap: 4px;
+    }
+
+    .mini-score span {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 11px;
+      font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+    }
+
+    .bar {
+      height: 7px;
+      border-radius: 99px;
+      overflow: hidden;
+      background: #e5ded2;
+    }
+
+    .bar b {
+      display: block;
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: var(--green);
+    }
+
+    .reader-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 330px;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .reader-article {
+      padding: 26px;
+    }
+
+    .reader-article h1 {
+      margin: 0 0 12px;
+      font-size: 34px;
+      line-height: 1.14;
+    }
+
+    .reader-article p {
+      margin: 0 0 16px;
+      font-size: 17px;
+      line-height: 1.82;
+    }
+
+    .reader-article .lead {
+      color: var(--muted);
+      font-size: 18px;
+      border-left: 3px solid var(--green);
+      padding-left: 14px;
+      margin-bottom: 20px;
+    }
+
+    .side-stack {
+      display: grid;
+      gap: 12px;
+    }
+
+    .score-list {
+      display: grid;
+      gap: 11px;
+    }
+
+    .score-row {
+      display: grid;
+      gap: 5px;
+    }
+
+    .score-row label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+    }
+
+    .link-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .link-item {
+      display: grid;
+      grid-template-columns: 18px minmax(0, 1fr);
+      gap: 8px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .link-item:last-child {
+      border-bottom: 0;
+    }
+
+    .link-item strong {
+      display: block;
+      font-size: 13px;
+      line-height: 1.25;
+    }
+
+    .link-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .link-item i {
+      color: var(--blue);
+      margin-top: 1px;
+    }
+
+    .graph-shell {
+      min-height: 560px;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(33, 116, 92, 0.16), transparent 32%),
+        radial-gradient(circle at 85% 25%, rgba(36, 94, 143, 0.13), transparent 34%),
+        linear-gradient(180deg, rgba(255, 253, 247, 0.94), rgba(240, 238, 231, 0.88));
+    }
+
+    #linkCanvas {
+      width: 100%;
+      height: 560px;
+      display: block;
+    }
+
+    .legend {
+      position: absolute;
+      right: 14px;
+      bottom: 14px;
+      display: grid;
+      gap: 7px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 253, 247, 0.9);
+      color: var(--muted);
+      font-size: 12px;
+      font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+    }
+
+    .legend span {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .graph-tip {
+      position: absolute;
+      z-index: 5;
+      max-width: 250px;
+      display: none;
+      padding: 10px 12px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      pointer-events: none;
+      font-size: 13px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    .field > span {
+      color: var(--muted);
+      font-size: 12px;
+      font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+      font-weight: 700;
+    }
+
+    .field input,
+    .field textarea,
+    .field select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      color: var(--ink);
+      outline: none;
+      padding: 10px 11px;
+      font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+    }
+
+    .field textarea {
+      min-height: 126px;
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(36, 94, 143, 0.12);
+    }
+
+    .result-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .diagnosis {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .diagnosis-cell {
+      min-height: 96px;
+      display: grid;
+      align-content: space-between;
+      gap: 8px;
+      border-radius: 8px;
+      padding: 12px;
+      background: var(--panel);
+    }
+
+    .diagnosis-cell strong {
+      font-size: 27px;
+      line-height: 1;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    .diagnosis-cell span {
+      color: var(--muted);
+      font-size: 12px;
+      font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+    }
+
+    .claim-list {
+      display: grid;
+      gap: 8px;
+      counter-reset: claims;
+    }
+
+    .action-box {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .action-box h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .action-box small {
+      color: var(--muted);
+      font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+    }
+
+    .claim {
+      counter-increment: claims;
+      display: grid;
+      grid-template-columns: 30px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: start;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+    }
+
+    .claim::before {
+      content: counter(claims);
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--ink);
+      color: var(--paper);
+      font-size: 12px;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    .claim p {
+      margin: 0;
+      color: var(--ink);
+      font-size: 14px;
+    }
+
+    .claim em {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      font-style: normal;
+      font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+    }
+
+    .source-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .source-card {
+      display: grid;
+      gap: 9px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+    }
+
+    .source-card header {
+      display: grid;
+      grid-template-columns: 10px minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .source-card h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .source-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+    }
+
+    .toggle {
+      position: relative;
+      width: 46px;
+      height: 26px;
+      border: 1px solid var(--line);
+      border-radius: 99px;
+      background: var(--panel);
+      cursor: pointer;
+    }
+
+    .toggle::after {
+      content: "";
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      left: 2px;
+      top: 2px;
+      border-radius: 50%;
+      background: var(--soft);
+      transition: transform 0.16s ease, background 0.16s ease;
+    }
+
+    .toggle.on::after {
+      transform: translateX(20px);
+      background: var(--green);
+    }
+
+    .trail-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .trail-step {
+      display: grid;
+      grid-template-columns: 38px minmax(0, 1fr);
+      gap: 11px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+    }
+
+    .trail-step b {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: var(--ink);
+      color: var(--paper);
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    .trail-step h3 {
+      margin: 0 0 4px;
+      font-size: 16px;
+    }
+
+    .trail-step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+    }
+
+    .empty {
+      min-height: 180px;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      color: var(--muted);
+      text-align: center;
+      font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      z-index: 100;
+      transform: translateX(-50%) translateY(20px);
+      opacity: 0;
+      max-width: min(460px, calc(100vw - 28px));
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      background: var(--ink);
+      color: var(--paper);
+      box-shadow: var(--shadow);
+      font-family: ui-sans-serif, system-ui, "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+      pointer-events: none;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .mobile-menu {
+      display: none;
+    }
+
+    @media (max-width: 1040px) {
+      :root {
+        --sidebar: 214px;
+      }
+
+      .metric-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .split,
+      .reader-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .side-stack {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .source-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: fixed;
+        z-index: 60;
+        left: 0;
+        top: 0;
+        width: min(320px, 86vw);
+        transform: translateX(-105%);
+        transition: transform 0.2s ease;
+        box-shadow: var(--shadow);
+      }
+
+      body.menu-open .sidebar {
+        transform: translateX(0);
+      }
+
+      .mobile-menu {
+        display: grid;
+      }
+
+      .topbar {
+        grid-template-columns: auto minmax(0, 1fr);
+      }
+
+      .topbar > .toolbar {
+        grid-column: 1 / -1;
+      }
+
+      .metric-grid,
+      .diagnosis,
+      .form-grid,
+      .side-stack {
+        grid-template-columns: 1fr;
+      }
+
+      .article-card {
+        grid-template-columns: 1fr;
+      }
+
+      .score-stack {
+        width: 100%;
+      }
+
+      .reader-article {
+        padding: 18px;
+      }
+
+      .reader-article h1 {
+        font-size: 27px;
+      }
+
+      .content {
+        padding: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="主导航" data-i18n-aria-label="sidebar.aria">
+      <div class="brand">
+        <div class="brand-mark"><i class="ti ti-link" aria-hidden="true"></i></div>
+        <div class="brand-title">
+          <strong>HyperReader</strong>
+          <span data-i18n="brand.subtitle">开放链接阅读工作台</span>
+        </div>
+      </div>
+
+      <nav class="nav-block">
+        <div class="nav-label" data-i18n="nav.workspace">工作区</div>
+        <button class="nav-item active" data-view="queue" onclick="showView('queue')">
+          <i class="ti ti-list-search" aria-hidden="true"></i><span data-i18n="nav.queue">阅读队列</span><span class="count" id="navQueueCount">0</span>
+        </button>
+        <button class="nav-item" data-view="reader" onclick="showReader(state.selectedId)">
+          <i class="ti ti-book-2" aria-hidden="true"></i><span data-i18n="nav.reader">深读室</span><span class="count" id="navSavedCount">0</span>
+        </button>
+        <button class="nav-item" data-view="graph" onclick="showView('graph')">
+          <i class="ti ti-chart-dots-3" aria-hidden="true"></i><span data-i18n="nav.graph">外链图谱</span><span class="count" id="navGraphCount">0</span>
+        </button>
+        <button class="nav-item" data-view="diagnose" onclick="showView('diagnose')">
+          <i class="ti ti-stethoscope" aria-hidden="true"></i><span data-i18n="nav.diagnose">文本诊断</span><span class="count" data-i18n="nav.local">本地</span>
+        </button>
+        <button class="nav-item" data-view="trail" onclick="showView('trail')">
+          <i class="ti ti-route" aria-hidden="true"></i><span data-i18n="nav.trail">阅读路径</span><span class="count" id="navTrailCount">0</span>
+        </button>
+        <button class="nav-item" data-view="sources" onclick="showView('sources')">
+          <i class="ti ti-antenna-bars-5" aria-hidden="true"></i><span data-i18n="nav.sources">来源库</span><span class="count" id="navSourceCount">0</span>
+        </button>
+      </nav>
+
+      <section class="source-strip" id="sourceStrip" aria-label="来源开放度" data-i18n-aria-label="sourceStrip.aria"></section>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-btn mobile-menu" onclick="toggleMenu()" title="导航" data-i18n-title="mobileMenu.title">
+          <i class="ti ti-menu-2" aria-hidden="true"></i>
+        </button>
+        <label class="search">
+          <i class="ti ti-search" aria-hidden="true"></i>
+          <input id="searchInput" type="search" placeholder="搜索标题、来源、标签、链接域名" data-i18n-placeholder="search.placeholder" oninput="handleSearch(this.value)">
+        </label>
+        <div class="toolbar">
+          <label class="locale-select">
+            <i class="ti ti-language" aria-hidden="true"></i>
+            <select id="localeSelect" aria-label="语言" data-i18n-aria-label="locale.label" onchange="setLocale(this.value)">
+              <option value="zh-Hans">简体中文</option>
+              <option value="zh-Hant">繁體中文</option>
+              <option value="en">English</option>
+              <option value="ms">Malay</option>
+            </select>
+          </label>
+          <button class="btn" onclick="showView('diagnose')"><i class="ti ti-scan" aria-hidden="true"></i><span data-i18n="topbar.diagnose">诊断文本</span></button>
+          <button class="btn primary" onclick="showQuickAdd()"><i class="ti ti-plus" aria-hidden="true"></i><span data-i18n="topbar.add">添加链接</span></button>
+        </div>
+      </header>
+
+      <section class="content">
+        <section class="view active" id="view-queue">
+          <div class="metric-grid" id="metrics"></div>
+          <div class="split">
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2 data-i18n="queue.title">去算法阅读队列</h2>
+                  <small id="queueSubtitle">按开放度和关联主题排序</small>
+                </div>
+                <div class="toolbar">
+                  <button class="chip on" data-filter="all" onclick="setFilter('all')"><i class="ti ti-stack-2" aria-hidden="true"></i><span data-i18n="filter.all">全部</span></button>
+                  <button class="chip" data-filter="open" onclick="setFilter('open')"><i class="ti ti-world" aria-hidden="true"></i><span data-i18n="filter.open">高开放</span></button>
+                  <button class="chip" data-filter="needs-links" onclick="setFilter('needs-links')"><i class="ti ti-link-off" aria-hidden="true"></i><span data-i18n="filter.needsLinks">待补链</span></button>
+                  <button class="chip" data-filter="counter" onclick="setFilter('counter')"><i class="ti ti-arrows-left-right" aria-hidden="true"></i><span data-i18n="filter.counter">反方观点</span></button>
+                  <button class="chip" data-filter="saved" onclick="setFilter('saved')"><i class="ti ti-bookmark" aria-hidden="true"></i><span data-i18n="filter.saved">已保存</span></button>
+                </div>
+              </div>
+              <div class="panel-body">
+                <div class="feed" id="feed"></div>
+              </div>
+            </section>
+
+            <aside class="side-stack">
+              <section class="panel">
+                <div class="panel-head">
+                  <h3 data-i18n="focus.title">今日读法</h3>
+                  <button class="icon-btn" onclick="reshuffleFocus()" title="换一组" data-i18n-title="focus.shuffleTitle"><i class="ti ti-refresh" aria-hidden="true"></i></button>
+                </div>
+                <div class="panel-body" id="focusPanel"></div>
+              </section>
+              <section class="panel">
+                <div class="panel-head">
+                  <h3 data-i18n="zero.title">零点击警戒</h3>
+                  <button class="icon-btn" onclick="showView('diagnose')" title="诊断" data-i18n-title="diagnose.shortTitle"><i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+                </div>
+                <div class="panel-body" id="zeroClickPanel"></div>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-reader">
+          <div class="reader-layout">
+            <article class="panel reader-article" id="readerArticle"></article>
+            <aside class="side-stack">
+              <section class="panel">
+                <div class="panel-head">
+                  <h3 data-i18n="reader.radar">开放性雷达</h3>
+                  <button class="icon-btn" onclick="saveSelected()" title="保存" data-i18n-title="action.save"><i class="ti ti-bookmark" aria-hidden="true"></i></button>
+                </div>
+                <div class="panel-body">
+                  <div class="score-list" id="readerScores"></div>
+                </div>
+              </section>
+              <section class="panel">
+                <div class="panel-head">
+                  <h3 data-i18n="reader.linkList">外链清单</h3>
+                  <button class="icon-btn" onclick="copyLinkBundle()" title="复制清单" data-i18n-title="action.copyBundle"><i class="ti ti-copy" aria-hidden="true"></i></button>
+                </div>
+                <div class="panel-body">
+                  <div class="link-list" id="readerLinks"></div>
+                </div>
+              </section>
+              <section class="panel">
+                <div class="panel-head">
+                  <h3 data-i18n="reader.next">下一跳</h3>
+                  <button class="icon-btn" onclick="buildTrailFromSelected()" title="生成路径" data-i18n-title="action.buildTrail"><i class="ti ti-route" aria-hidden="true"></i></button>
+                </div>
+                <div class="panel-body" id="nextLinks"></div>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-graph">
+          <section class="panel graph-shell">
+            <canvas id="linkCanvas" aria-label="外链网络图" data-i18n-aria-label="graph.aria"></canvas>
+            <div class="graph-tip" id="graphTip"></div>
+            <div class="legend">
+              <span><i class="ti ti-circle-filled" style="color: var(--green)" aria-hidden="true"></i><span data-i18n="graph.legend.blog">独立站与博客</span></span>
+              <span><i class="ti ti-circle-filled" style="color: var(--blue)" aria-hidden="true"></i><span data-i18n="graph.legend.news">媒体与公共资料</span></span>
+              <span><i class="ti ti-circle-filled" style="color: var(--rust)" aria-hidden="true"></i><span data-i18n="graph.legend.research">研究与档案</span></span>
+              <span><i class="ti ti-line" aria-hidden="true"></i><span data-i18n="graph.legend.relation">引用与议题关系</span></span>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="view-diagnose">
+          <div class="split">
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2 data-i18n="diagnose.title">文本与 URL 诊断</h2>
+                  <small data-i18n="diagnose.subtitle">本地启发式分析</small>
+                </div>
+                <button class="btn green" onclick="runDiagnosis()"><i class="ti ti-activity" aria-hidden="true"></i><span data-i18n="diagnose.run">开始诊断</span></button>
+              </div>
+              <div class="panel-body">
+                <div class="form-grid">
+                  <label class="field full">
+                    <span data-i18n="diagnose.inputLabel">内容或链接</span>
+                    <textarea id="diagnosisInput" placeholder="粘贴一段帖子、新闻摘要、AI Overview、搜索结果或 URL" data-i18n-placeholder="diagnose.inputPlaceholder"></textarea>
+                  </label>
+                  <label class="field">
+                    <span data-i18n="diagnose.modeLabel">阅读场景</span>
+                    <select id="diagnosisMode">
+                      <option value="feed" data-i18n="diagnose.mode.feed">社交媒体资讯流</option>
+                      <option value="search" data-i18n="diagnose.mode.search">搜索结果或 AI 摘要</option>
+                      <option value="article" data-i18n="diagnose.mode.article">长文或报道</option>
+                      <option value="chat" data-i18n="diagnose.mode.chat">群聊转发</option>
+                    </select>
+                  </label>
+                  <label class="field">
+                    <span data-i18n="diagnose.goalLabel">目标</span>
+                    <select id="diagnosisGoal">
+                      <option value="verify" data-i18n="diagnose.goal.verify">查证事实</option>
+                      <option value="understand" data-i18n="diagnose.goal.understand">理解议题</option>
+                      <option value="debate" data-i18n="diagnose.goal.debate">准备讨论</option>
+                      <option value="archive" data-i18n="diagnose.goal.archive">整理资料</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+            </section>
+
+            <aside class="side-stack">
+              <section class="panel">
+                <div class="panel-head">
+                  <h3 data-i18n="diagnose.resultTitle">诊断结果</h3>
+                  <button class="icon-btn" onclick="copyDiagnosis()" title="复制" data-i18n-title="action.copy"><i class="ti ti-copy" aria-hidden="true"></i></button>
+                </div>
+                <div class="panel-body result-grid" id="diagnosisResult"></div>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-trail">
+          <div class="split">
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2 data-i18n="trail.title">七步阅读路径</h2>
+                  <small id="trailSeedLabel">从当前选中文章生成</small>
+                </div>
+                <div class="toolbar">
+                  <button class="btn" onclick="buildTrailFromSelected()"><i class="ti ti-route" aria-hidden="true"></i><span data-i18n="trail.generate">生成</span></button>
+                  <button class="btn primary" onclick="copyTrailMarkdown()"><i class="ti ti-markdown" aria-hidden="true"></i><span data-i18n="trail.copyMarkdown">复制 Markdown</span></button>
+                </div>
+              </div>
+              <div class="panel-body">
+                <div class="trail-list" id="trailList"></div>
+              </div>
+            </section>
+
+            <aside class="side-stack">
+              <section class="panel">
+                <div class="panel-head">
+                  <h3 data-i18n="trail.params">路径参数</h3>
+                  <button class="icon-btn" onclick="showQuickAdd()" title="添加" data-i18n-title="action.add"><i class="ti ti-plus" aria-hidden="true"></i></button>
+                </div>
+                <div class="panel-body">
+                  <div class="form-grid">
+                    <label class="field full">
+                      <span data-i18n="trail.topicLabel">议题焦点</span>
+                      <input id="trailTopic" type="text" placeholder="例如：开放互联网、AI 摘要、公共领域" data-i18n-placeholder="trail.topicPlaceholder">
+                    </label>
+                    <label class="field">
+                      <span data-i18n="trail.intensityLabel">路径强度</span>
+                      <select id="trailIntensity">
+                        <option value="normal" data-i18n="trail.intensity.normal">标准</option>
+                        <option value="deep" data-i18n="trail.intensity.deep">深读</option>
+                        <option value="action" data-i18n="trail.intensity.action">行动</option>
+                      </select>
+                    </label>
+                    <label class="field">
+                      <span data-i18n="trail.preferenceLabel">偏好来源</span>
+                      <select id="trailPreference">
+                        <option value="mixed" data-i18n="trail.preference.mixed">混合来源</option>
+                        <option value="primary" data-i18n="trail.preference.primary">原始资料优先</option>
+                        <option value="counter" data-i18n="trail.preference.counter">反方观点优先</option>
+                        <option value="local" data-i18n="trail.preference.local">本地社区优先</option>
+                      </select>
+                    </label>
+                  </div>
+                </div>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="view-sources">
+          <div class="split">
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2 data-i18n="sources.title">来源库</h2>
+                  <small data-i18n="sources.subtitle">RSS、独立站、档案、公共资料</small>
+                </div>
+                <div class="toolbar">
+                  <button class="btn" onclick="exportData()"><i class="ti ti-download" aria-hidden="true"></i><span data-i18n="sources.export">导出</span></button>
+                  <button class="btn primary" onclick="showQuickAdd()"><i class="ti ti-plus" aria-hidden="true"></i><span data-i18n="sources.add">添加</span></button>
+                </div>
+              </div>
+              <div class="panel-body">
+                <div class="source-grid" id="sourceGrid"></div>
+              </div>
+            </section>
+
+            <aside class="side-stack">
+              <section class="panel">
+                <div class="panel-head">
+                  <h3 data-i18n="add.title">添加链接或来源</h3>
+                  <button class="icon-btn" onclick="resetQuickAdd()" title="清空" data-i18n-title="action.clear"><i class="ti ti-eraser" aria-hidden="true"></i></button>
+                </div>
+                <div class="panel-body">
+                  <div class="form-grid">
+                    <label class="field full">
+                      <span data-i18n="add.titleLabel">标题</span>
+                      <input id="addTitle" type="text" placeholder="文章、RSS 或资料库名称" data-i18n-placeholder="add.titlePlaceholder">
+                    </label>
+                    <label class="field full">
+                      <span>URL</span>
+                      <input id="addUrl" type="url" placeholder="https://">
+                    </label>
+                    <label class="field">
+                      <span data-i18n="add.typeLabel">类型</span>
+                      <select id="addType">
+                        <option value="blog" data-i18n="sourceType.blog">独立站</option>
+                        <option value="news" data-i18n="sourceType.news">媒体</option>
+                        <option value="research" data-i18n="sourceType.research">研究</option>
+                        <option value="archive" data-i18n="sourceType.archive">档案</option>
+                        <option value="community" data-i18n="sourceType.community">社区</option>
+                      </select>
+                    </label>
+                    <label class="field">
+                      <span data-i18n="add.linksLabel">外链数</span>
+                      <input id="addLinks" type="number" min="0" max="120" value="3">
+                    </label>
+                    <label class="field full">
+                      <span data-i18n="add.summaryLabel">摘要</span>
+                      <textarea id="addSummary" placeholder="此来源提供什么视角？它把读者导向哪里？" data-i18n-placeholder="add.summaryPlaceholder"></textarea>
+                    </label>
+                    <button class="btn green" style="grid-column: 1 / -1" onclick="addItem()">
+                      <i class="ti ti-check" aria-hidden="true"></i><span data-i18n="add.submit">加入阅读队列</span>
+                    </button>
+                  </div>
+                </div>
+              </section>
+            </aside>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STORAGE_KEY = "hyperreader.openweb.v2";
+    const sourceColors = {
+      blog: "#21745c",
+      news: "#245e8f",
+      research: "#a85632",
+      archive: "#6f527f",
+      community: "#a77a22"
+    };
+
+    const translations = {
+      "zh-Hans": {
+        "app.title": "HyperReader | 开放链接阅读工作台",
+        "sidebar.aria": "主导航",
+        "brand.subtitle": "开放链接阅读工作台",
+        "nav.workspace": "工作区",
+        "nav.queue": "阅读队列",
+        "nav.reader": "深读室",
+        "nav.graph": "外链图谱",
+        "nav.diagnose": "文本诊断",
+        "nav.trail": "阅读路径",
+        "nav.sources": "来源库",
+        "nav.local": "本地",
+        "sourceStrip.aria": "来源开放度",
+        "mobileMenu.title": "导航",
+        "locale.label": "语言",
+        "search.placeholder": "搜索标题、来源、标签、链接域名",
+        "topbar.diagnose": "诊断文本",
+        "topbar.add": "添加链接",
+        "queue.title": "去算法阅读队列",
+        "queue.subtitle": "{filtered} 个节点，{total} 个总条目",
+        "queue.empty": "没有匹配的阅读节点",
+        "filter.all": "全部",
+        "filter.open": "高开放",
+        "filter.needsLinks": "待补链",
+        "filter.counter": "反方观点",
+        "filter.saved": "已保存",
+        "focus.title": "今日读法",
+        "focus.shuffleTitle": "换一组",
+        "focus.first": "先读主文，记录三个可查证主张",
+        "focus.second": "再读差异视角，补一个反例",
+        "focus.build": "生成路径",
+        "focus.buildDetail": "把原文、证据、反方和行动连起来",
+        "zero.title": "零点击警戒",
+        "zero.riskyNodes": "高风险节点",
+        "zero.missingSources": "缺少原始出处",
+        "zero.needsLinks": "最需补链",
+        "zero.none": "无",
+        "zero.suggestedAction": "建议动作",
+        "zero.actionKinds": "原文、反方、档案",
+        "reader.radar": "开放性雷达",
+        "reader.linkList": "外链清单",
+        "reader.next": "下一跳",
+        "reader.empty": "阅读队列为空",
+        "reader.noOutlinks": "此节点需要补充外部链接",
+        "reader.noRelated": "没有共享标签的下一跳",
+        "graph.aria": "外链网络图",
+        "graph.legend.blog": "独立站与博客",
+        "graph.legend.news": "媒体与公共资料",
+        "graph.legend.research": "研究与档案",
+        "graph.legend.relation": "引用与议题关系",
+        "graph.tooltip": "开放 {score} · 外链 {links}",
+        "diagnose.shortTitle": "诊断",
+        "diagnose.title": "文本与 URL 诊断",
+        "diagnose.subtitle": "本地启发式分析",
+        "diagnose.run": "开始诊断",
+        "diagnose.inputLabel": "内容或链接",
+        "diagnose.inputPlaceholder": "粘贴一段帖子、新闻摘要、AI Overview、搜索结果或 URL",
+        "diagnose.modeLabel": "阅读场景",
+        "diagnose.mode.feed": "社交媒体资讯流",
+        "diagnose.mode.search": "搜索结果或 AI 摘要",
+        "diagnose.mode.article": "长文或报道",
+        "diagnose.mode.chat": "群聊转发",
+        "diagnose.goalLabel": "目标",
+        "diagnose.goal.verify": "查证事实",
+        "diagnose.goal.understand": "理解议题",
+        "diagnose.goal.debate": "准备讨论",
+        "diagnose.goal.archive": "整理资料",
+        "diagnose.resultTitle": "诊断结果",
+        "diagnose.waiting": "等待诊断内容",
+        "diagnose.noClaims": "没有识别到足够长的主张句",
+        "diagnose.openScore": "开放阅读分",
+        "diagnose.openScoreDetail": "越高越可追溯",
+        "diagnose.slopRisk": "AI 馊水风险",
+        "diagnose.slopRiskDetail": "标题党与无出处",
+        "diagnose.zeroClickRisk": "零点击风险",
+        "diagnose.zeroClickDetail": "不进入原文的概率",
+        "diagnose.actionsTitle": "补救动作",
+        "diagnose.domainCount": "{count} 个域名",
+        "diagnose.localAdvice": "本地诊断建议",
+        "diagnose.pendingCheck": "待查证",
+        "diagnose.toast.empty": "请先粘贴内容或 URL",
+        "diagnose.toast.noResult": "还没有诊断结果",
+        "diagnose.need.source": "需要明确出处",
+        "diagnose.need.data": "需要原始数据",
+        "diagnose.need.counter": "需要反方观点",
+        "diagnose.need.links": "需要至少两个外部链接",
+        "diagnose.need.crossRead": "需要交叉阅读",
+        "diagnose.action.addLinks": "补一个原始链接，再补一个反方链接。",
+        "diagnose.action.secondDomain": "增加第二个独立域名，避免单一来源循环引用。",
+        "diagnose.action.replaceVague": "把“专家表示”“网传”“消息称”改写成可追踪出处。",
+        "diagnose.action.trimHype": "删除刺激性标题词，保留可验证主张。",
+        "diagnose.action.openOriginal": "点开原网页，比较摘要与正文是否一致。",
+        "diagnose.action.counter": "整理一条最强反方论证，避免只读同温层材料。",
+        "diagnose.action.archive": "保留当前链接结构，再补充长期可访问的档案副本。",
+        "trail.title": "七步阅读路径",
+        "trail.seedDefault": "从当前选中文章生成",
+        "trail.seedLabel": "起点：{title}",
+        "trail.generate": "生成",
+        "trail.copyMarkdown": "复制 Markdown",
+        "trail.params": "路径参数",
+        "trail.topicLabel": "议题焦点",
+        "trail.topicPlaceholder": "例如：开放互联网、AI 摘要、公共领域",
+        "trail.intensityLabel": "路径强度",
+        "trail.intensity.normal": "标准",
+        "trail.intensity.deep": "深读",
+        "trail.intensity.action": "行动",
+        "trail.preferenceLabel": "偏好来源",
+        "trail.preference.mixed": "混合来源",
+        "trail.preference.primary": "原始资料优先",
+        "trail.preference.counter": "反方观点优先",
+        "trail.preference.local": "本地社区优先",
+        "trail.topicFallback": "开放互联网",
+        "trail.note.seed": "起点：围绕“{topic}”读原文，不先接受摘要。",
+        "trail.note.primary": "回到原始资料、档案、会议记录或数据。",
+        "trail.note.research": "补概念、方法和研究脉络，检查论证边界。",
+        "trail.note.counter": "寻找最强反方观点，避免算法同温层。",
+        "trail.note.weak": "识别缺链内容，列出需要查证的主张。",
+        "trail.note.community": "进入社区讨论，观察真实受影响者的经验。",
+        "trail.note.solution": "沉淀成可分享、可回访、可继续补链的阅读清单。",
+        "trail.toast.built": "已生成七步阅读路径",
+        "sources.title": "来源库",
+        "sources.subtitle": "RSS、独立站、档案、公共资料",
+        "sources.export": "导出",
+        "sources.add": "添加",
+        "source.openness": "开放度",
+        "source.toggleAria": "切换来源",
+        "source.enabled": "来源已启用",
+        "source.paused": "来源已暂停",
+        "add.title": "添加链接或来源",
+        "add.titleLabel": "标题",
+        "add.titlePlaceholder": "文章、RSS 或资料库名称",
+        "add.typeLabel": "类型",
+        "add.linksLabel": "外链数",
+        "add.summaryLabel": "摘要",
+        "add.summaryPlaceholder": "此来源提供什么视角？它把读者导向哪里？",
+        "add.submit": "加入阅读队列",
+        "add.toast.missing": "标题和 URL 不能为空",
+        "add.toast.added": "已加入阅读队列",
+        "add.sourceName": "手动添加",
+        "add.tag": "手动添加",
+        "add.summaryDefault": "新的阅读节点，等待补充摘要与外部链接。",
+        "add.bodyDefault1": "这是手动加入的阅读节点。可以把它作为事实查证、反方阅读或资料整理的入口。",
+        "add.bodyDefault2": "建议补充原始出处、反方观点和长期可访问的档案链接。",
+        "add.original": "原文",
+        "add.sourceNoteDefault": "由手动链接自动加入。",
+        "sourceType.blog": "独立站",
+        "sourceType.news": "媒体",
+        "sourceType.research": "研究",
+        "sourceType.archive": "档案",
+        "sourceType.community": "社区",
+        "sourceType.fallback": "来源",
+        "metric.openIndex": "开放指数",
+        "metric.openDetail": "越高越像开放网页",
+        "metric.outlinks": "外链节点",
+        "metric.outlinksDetail": "可追溯的下一跳",
+        "metric.needsLinks": "待补链",
+        "metric.needsLinksDetail": "缺少证据或出处",
+        "metric.saved": "已保存",
+        "metric.savedDetail": "个人公共记忆",
+        "tag.open": "开放 {score}",
+        "tag.outlinks": "{count} 外链",
+        "mini.links": "外链",
+        "mini.evidence": "证据",
+        "mini.counter": "反方",
+        "score.link": "外链慷慨度",
+        "score.diversity": "来源多样性",
+        "score.primary": "原始资料",
+        "score.contrast": "观点对照",
+        "score.independence": "平台独立性",
+        "action.save": "保存",
+        "action.unsave": "取消保存",
+        "action.copy": "复制",
+        "action.copyBundle": "复制清单",
+        "action.buildTrail": "生成路径",
+        "action.add": "添加",
+        "action.clear": "清空",
+        "toast.saved": "已保存到个人公共记忆",
+        "toast.unsaved": "已取消保存",
+        "toast.savedCurrent": "已保存当前节点",
+        "toast.copied": "已复制到剪贴板",
+        "toast.exported": "已导出开放阅读资料",
+        "copy.trailTitle": "HyperReader 阅读路径",
+        "copy.pendingOutlink": "待补充外链",
+        "copy.diagnosisOpenScore": "开放阅读分：{score}",
+        "copy.diagnosisSlopRisk": "AI 馊水风险：{score}",
+        "copy.diagnosisZeroRisk": "零点击风险：{score}",
+        "copy.diagnosisActions": "补救动作："
+      },
+      "zh-Hant": {
+        "app.title": "HyperReader | 開放連結閱讀工作台",
+        "sidebar.aria": "主導覽",
+        "brand.subtitle": "開放連結閱讀工作台",
+        "nav.workspace": "工作區",
+        "nav.queue": "閱讀佇列",
+        "nav.reader": "深讀室",
+        "nav.graph": "外連圖譜",
+        "nav.diagnose": "文字診斷",
+        "nav.trail": "閱讀路徑",
+        "nav.sources": "來源庫",
+        "nav.local": "本機",
+        "sourceStrip.aria": "來源開放度",
+        "mobileMenu.title": "導覽",
+        "locale.label": "語言",
+        "search.placeholder": "搜尋標題、來源、標籤、連結網域",
+        "topbar.diagnose": "診斷文字",
+        "topbar.add": "新增連結",
+        "queue.title": "去演算法閱讀佇列",
+        "queue.subtitle": "{filtered} 個節點，{total} 個總項目",
+        "queue.empty": "沒有符合的閱讀節點",
+        "filter.all": "全部",
+        "filter.open": "高開放",
+        "filter.needsLinks": "待補鏈",
+        "filter.counter": "反方觀點",
+        "filter.saved": "已儲存",
+        "focus.title": "今日讀法",
+        "focus.shuffleTitle": "換一組",
+        "focus.first": "先讀主文，記錄三個可查證主張",
+        "focus.second": "再讀差異視角，補一個反例",
+        "focus.build": "生成路徑",
+        "focus.buildDetail": "把原文、證據、反方和行動連起來",
+        "zero.title": "零點擊警戒",
+        "zero.riskyNodes": "高風險節點",
+        "zero.missingSources": "缺少原始出處",
+        "zero.needsLinks": "最需補鏈",
+        "zero.none": "無",
+        "zero.suggestedAction": "建議動作",
+        "zero.actionKinds": "原文、反方、檔案",
+        "reader.radar": "開放性雷達",
+        "reader.linkList": "外連清單",
+        "reader.next": "下一跳",
+        "reader.empty": "閱讀佇列為空",
+        "reader.noOutlinks": "此節點需要補充外部連結",
+        "reader.noRelated": "沒有共享標籤的下一跳",
+        "graph.aria": "外連網路圖",
+        "graph.legend.blog": "獨立站與部落格",
+        "graph.legend.news": "媒體與公共資料",
+        "graph.legend.research": "研究與檔案",
+        "graph.legend.relation": "引用與議題關係",
+        "graph.tooltip": "開放 {score} · 外連 {links}",
+        "diagnose.shortTitle": "診斷",
+        "diagnose.title": "文字與 URL 診斷",
+        "diagnose.subtitle": "本機啟發式分析",
+        "diagnose.run": "開始診斷",
+        "diagnose.inputLabel": "內容或連結",
+        "diagnose.inputPlaceholder": "貼上一段貼文、新聞摘要、AI Overview、搜尋結果或 URL",
+        "diagnose.modeLabel": "閱讀場景",
+        "diagnose.mode.feed": "社群媒體資訊流",
+        "diagnose.mode.search": "搜尋結果或 AI 摘要",
+        "diagnose.mode.article": "長文或報導",
+        "diagnose.mode.chat": "群聊轉發",
+        "diagnose.goalLabel": "目標",
+        "diagnose.goal.verify": "查證事實",
+        "diagnose.goal.understand": "理解議題",
+        "diagnose.goal.debate": "準備討論",
+        "diagnose.goal.archive": "整理資料",
+        "diagnose.resultTitle": "診斷結果",
+        "diagnose.waiting": "等待診斷內容",
+        "diagnose.noClaims": "沒有識別到足夠長的主張句",
+        "diagnose.openScore": "開放閱讀分",
+        "diagnose.openScoreDetail": "越高越可追溯",
+        "diagnose.slopRisk": "AI 劣質內容風險",
+        "diagnose.slopRiskDetail": "標題黨與無出處",
+        "diagnose.zeroClickRisk": "零點擊風險",
+        "diagnose.zeroClickDetail": "不進入原文的機率",
+        "diagnose.actionsTitle": "補救動作",
+        "diagnose.domainCount": "{count} 個網域",
+        "diagnose.localAdvice": "本機診斷建議",
+        "diagnose.pendingCheck": "待查證",
+        "diagnose.toast.empty": "請先貼上內容或 URL",
+        "diagnose.toast.noResult": "還沒有診斷結果",
+        "diagnose.need.source": "需要明確出處",
+        "diagnose.need.data": "需要原始資料",
+        "diagnose.need.counter": "需要反方觀點",
+        "diagnose.need.links": "需要至少兩個外部連結",
+        "diagnose.need.crossRead": "需要交叉閱讀",
+        "diagnose.action.addLinks": "補一個原始連結，再補一個反方連結。",
+        "diagnose.action.secondDomain": "增加第二個獨立網域，避免單一來源循環引用。",
+        "diagnose.action.replaceVague": "把「專家表示」「網傳」「消息稱」改寫成可追蹤出處。",
+        "diagnose.action.trimHype": "刪除刺激性標題詞，保留可驗證主張。",
+        "diagnose.action.openOriginal": "點開原網頁，比較摘要與正文是否一致。",
+        "diagnose.action.counter": "整理一條最強反方論證，避免只讀同溫層材料。",
+        "diagnose.action.archive": "保留目前連結結構，再補充長期可存取的檔案副本。",
+        "trail.title": "七步閱讀路徑",
+        "trail.seedDefault": "從目前選中文章生成",
+        "trail.seedLabel": "起點：{title}",
+        "trail.generate": "生成",
+        "trail.copyMarkdown": "複製 Markdown",
+        "trail.params": "路徑參數",
+        "trail.topicLabel": "議題焦點",
+        "trail.topicPlaceholder": "例如：開放網際網路、AI 摘要、公共領域",
+        "trail.intensityLabel": "路徑強度",
+        "trail.intensity.normal": "標準",
+        "trail.intensity.deep": "深讀",
+        "trail.intensity.action": "行動",
+        "trail.preferenceLabel": "偏好來源",
+        "trail.preference.mixed": "混合來源",
+        "trail.preference.primary": "原始資料優先",
+        "trail.preference.counter": "反方觀點優先",
+        "trail.preference.local": "本地社群優先",
+        "trail.topicFallback": "開放網際網路",
+        "trail.note.seed": "起點：圍繞「{topic}」讀原文，不先接受摘要。",
+        "trail.note.primary": "回到原始資料、檔案、會議記錄或資料。",
+        "trail.note.research": "補概念、方法和研究脈絡，檢查論證邊界。",
+        "trail.note.counter": "尋找最強反方觀點，避免演算法同溫層。",
+        "trail.note.weak": "識別缺鏈內容，列出需要查證的主張。",
+        "trail.note.community": "進入社群討論，觀察真實受影響者的經驗。",
+        "trail.note.solution": "沉澱成可分享、可回訪、可繼續補鏈的閱讀清單。",
+        "trail.toast.built": "已生成七步閱讀路徑",
+        "sources.title": "來源庫",
+        "sources.subtitle": "RSS、獨立站、檔案、公共資料",
+        "sources.export": "匯出",
+        "sources.add": "新增",
+        "source.openness": "開放度",
+        "source.toggleAria": "切換來源",
+        "source.enabled": "來源已啟用",
+        "source.paused": "來源已暫停",
+        "add.title": "新增連結或來源",
+        "add.titleLabel": "標題",
+        "add.titlePlaceholder": "文章、RSS 或資料庫名稱",
+        "add.typeLabel": "類型",
+        "add.linksLabel": "外連數",
+        "add.summaryLabel": "摘要",
+        "add.summaryPlaceholder": "此來源提供什麼視角？它把讀者導向哪裡？",
+        "add.submit": "加入閱讀佇列",
+        "add.toast.missing": "標題和 URL 不能為空",
+        "add.toast.added": "已加入閱讀佇列",
+        "add.sourceName": "手動新增",
+        "add.tag": "手動新增",
+        "add.summaryDefault": "新的閱讀節點，等待補充摘要與外部連結。",
+        "add.bodyDefault1": "這是手動加入的閱讀節點。可以把它作為事實查證、反方閱讀或資料整理的入口。",
+        "add.bodyDefault2": "建議補充原始出處、反方觀點和長期可存取的檔案連結。",
+        "add.original": "原文",
+        "add.sourceNoteDefault": "由手動連結自動加入。",
+        "sourceType.blog": "獨立站",
+        "sourceType.news": "媒體",
+        "sourceType.research": "研究",
+        "sourceType.archive": "檔案",
+        "sourceType.community": "社群",
+        "sourceType.fallback": "來源",
+        "metric.openIndex": "開放指數",
+        "metric.openDetail": "越高越像開放網頁",
+        "metric.outlinks": "外連節點",
+        "metric.outlinksDetail": "可追溯的下一跳",
+        "metric.needsLinks": "待補鏈",
+        "metric.needsLinksDetail": "缺少證據或出處",
+        "metric.saved": "已儲存",
+        "metric.savedDetail": "個人公共記憶",
+        "tag.open": "開放 {score}",
+        "tag.outlinks": "{count} 外連",
+        "mini.links": "外連",
+        "mini.evidence": "證據",
+        "mini.counter": "反方",
+        "score.link": "外連慷慨度",
+        "score.diversity": "來源多樣性",
+        "score.primary": "原始資料",
+        "score.contrast": "觀點對照",
+        "score.independence": "平台獨立性",
+        "action.save": "儲存",
+        "action.unsave": "取消儲存",
+        "action.copy": "複製",
+        "action.copyBundle": "複製清單",
+        "action.buildTrail": "生成路徑",
+        "action.add": "新增",
+        "action.clear": "清空",
+        "toast.saved": "已儲存到個人公共記憶",
+        "toast.unsaved": "已取消儲存",
+        "toast.savedCurrent": "已儲存目前節點",
+        "toast.copied": "已複製到剪貼簿",
+        "toast.exported": "已匯出開放閱讀資料",
+        "copy.trailTitle": "HyperReader 閱讀路徑",
+        "copy.pendingOutlink": "待補充外連",
+        "copy.diagnosisOpenScore": "開放閱讀分：{score}",
+        "copy.diagnosisSlopRisk": "AI 劣質內容風險：{score}",
+        "copy.diagnosisZeroRisk": "零點擊風險：{score}",
+        "copy.diagnosisActions": "補救動作："
+      },
+      en: {
+        "app.title": "HyperReader | Open Link Reading Workspace",
+        "sidebar.aria": "Primary navigation",
+        "brand.subtitle": "Open link reading workspace",
+        "nav.workspace": "Workspace",
+        "nav.queue": "Reading Queue",
+        "nav.reader": "Deep Reader",
+        "nav.graph": "Link Graph",
+        "nav.diagnose": "Text Diagnosis",
+        "nav.trail": "Reading Trail",
+        "nav.sources": "Source Library",
+        "nav.local": "Local",
+        "sourceStrip.aria": "Source openness",
+        "mobileMenu.title": "Navigation",
+        "locale.label": "Language",
+        "search.placeholder": "Search titles, sources, tags, or link domains",
+        "topbar.diagnose": "Diagnose Text",
+        "topbar.add": "Add Link",
+        "queue.title": "De-Algorithm Reading Queue",
+        "queue.subtitle": "{filtered} nodes, {total} total items",
+        "queue.empty": "No matching reading nodes",
+        "filter.all": "All",
+        "filter.open": "High Openness",
+        "filter.needsLinks": "Needs Links",
+        "filter.counter": "Counterpoints",
+        "filter.saved": "Saved",
+        "focus.title": "Today's Reading",
+        "focus.shuffleTitle": "Refresh set",
+        "focus.first": "Read the primary piece first and note three verifiable claims",
+        "focus.second": "Then read a differing angle and add one counterexample",
+        "focus.build": "Build trail",
+        "focus.buildDetail": "Connect original text, evidence, counterpoints, and action",
+        "zero.title": "Zero-Click Watch",
+        "zero.riskyNodes": "High-risk nodes",
+        "zero.missingSources": "Missing primary sources",
+        "zero.needsLinks": "Most needs links",
+        "zero.none": "None",
+        "zero.suggestedAction": "Suggested action",
+        "zero.actionKinds": "Original, counterpoint, archive",
+        "reader.radar": "Openness Radar",
+        "reader.linkList": "Outbound Links",
+        "reader.next": "Next Jump",
+        "reader.empty": "The reading queue is empty",
+        "reader.noOutlinks": "This node needs more external links",
+        "reader.noRelated": "No next jump with shared tags",
+        "graph.aria": "Outbound link network graph",
+        "graph.legend.blog": "Independent sites and blogs",
+        "graph.legend.news": "Media and public materials",
+        "graph.legend.research": "Research and archives",
+        "graph.legend.relation": "Citation and topic relations",
+        "graph.tooltip": "Openness {score} · Links {links}",
+        "diagnose.shortTitle": "Diagnose",
+        "diagnose.title": "Text and URL Diagnosis",
+        "diagnose.subtitle": "Local heuristic analysis",
+        "diagnose.run": "Run Diagnosis",
+        "diagnose.inputLabel": "Content or link",
+        "diagnose.inputPlaceholder": "Paste a post, news summary, AI Overview, search result, or URL",
+        "diagnose.modeLabel": "Reading context",
+        "diagnose.mode.feed": "Social media feed",
+        "diagnose.mode.search": "Search result or AI summary",
+        "diagnose.mode.article": "Longform or reporting",
+        "diagnose.mode.chat": "Forwarded chat",
+        "diagnose.goalLabel": "Goal",
+        "diagnose.goal.verify": "Verify facts",
+        "diagnose.goal.understand": "Understand an issue",
+        "diagnose.goal.debate": "Prepare discussion",
+        "diagnose.goal.archive": "Organize sources",
+        "diagnose.resultTitle": "Diagnosis Result",
+        "diagnose.waiting": "Waiting for diagnosis input",
+        "diagnose.noClaims": "No long enough claim sentences found",
+        "diagnose.openScore": "Open Reading Score",
+        "diagnose.openScoreDetail": "Higher means easier to trace",
+        "diagnose.slopRisk": "AI Slop Risk",
+        "diagnose.slopRiskDetail": "Hype and missing sources",
+        "diagnose.zeroClickRisk": "Zero-Click Risk",
+        "diagnose.zeroClickDetail": "Chance of not opening originals",
+        "diagnose.actionsTitle": "Repair Actions",
+        "diagnose.domainCount": "{count} domains",
+        "diagnose.localAdvice": "Local diagnosis advice",
+        "diagnose.pendingCheck": "To verify",
+        "diagnose.toast.empty": "Paste content or a URL first",
+        "diagnose.toast.noResult": "There is no diagnosis result yet",
+        "diagnose.need.source": "Needs a clear source",
+        "diagnose.need.data": "Needs primary data",
+        "diagnose.need.counter": "Needs a counterpoint",
+        "diagnose.need.links": "Needs at least two external links",
+        "diagnose.need.crossRead": "Needs cross-reading",
+        "diagnose.action.addLinks": "Add one primary link, then one counterpoint link.",
+        "diagnose.action.secondDomain": "Add a second independent domain to avoid source loops.",
+        "diagnose.action.replaceVague": "Replace vague attributions with traceable sources.",
+        "diagnose.action.trimHype": "Remove hype terms and keep verifiable claims.",
+        "diagnose.action.openOriginal": "Open the original page and compare the summary with the body.",
+        "diagnose.action.counter": "Write down the strongest counterargument before staying in one bubble.",
+        "diagnose.action.archive": "Keep the current link structure and add a durable archive copy.",
+        "trail.title": "Seven-Step Reading Trail",
+        "trail.seedDefault": "Generated from the selected article",
+        "trail.seedLabel": "Start: {title}",
+        "trail.generate": "Generate",
+        "trail.copyMarkdown": "Copy Markdown",
+        "trail.params": "Trail Parameters",
+        "trail.topicLabel": "Topic focus",
+        "trail.topicPlaceholder": "Example: open web, AI summaries, public domain",
+        "trail.intensityLabel": "Trail intensity",
+        "trail.intensity.normal": "Standard",
+        "trail.intensity.deep": "Deep read",
+        "trail.intensity.action": "Action",
+        "trail.preferenceLabel": "Source preference",
+        "trail.preference.mixed": "Mixed sources",
+        "trail.preference.primary": "Primary sources first",
+        "trail.preference.counter": "Counterpoints first",
+        "trail.preference.local": "Local communities first",
+        "trail.topicFallback": "open web",
+        "trail.note.seed": "Start: read the original around \"{topic}\" before accepting any summary.",
+        "trail.note.primary": "Return to primary materials, archives, meeting records, or data.",
+        "trail.note.research": "Add concepts, methods, and research context; check argument boundaries.",
+        "trail.note.counter": "Find the strongest counterpoint and avoid an algorithmic bubble.",
+        "trail.note.weak": "Identify missing-link content and list claims that need verification.",
+        "trail.note.community": "Enter community discussion and observe affected people's experience.",
+        "trail.note.solution": "Turn it into a shareable, revisitable reading list that can keep gaining links.",
+        "trail.toast.built": "Seven-step reading trail generated",
+        "sources.title": "Source Library",
+        "sources.subtitle": "RSS, independent sites, archives, public materials",
+        "sources.export": "Export",
+        "sources.add": "Add",
+        "source.openness": "Openness",
+        "source.toggleAria": "Toggle source",
+        "source.enabled": "Source enabled",
+        "source.paused": "Source paused",
+        "add.title": "Add Link or Source",
+        "add.titleLabel": "Title",
+        "add.titlePlaceholder": "Article, RSS, or archive name",
+        "add.typeLabel": "Type",
+        "add.linksLabel": "Outbound links",
+        "add.summaryLabel": "Summary",
+        "add.summaryPlaceholder": "What perspective does this source offer? Where does it lead readers?",
+        "add.submit": "Add to Reading Queue",
+        "add.toast.missing": "Title and URL are required",
+        "add.toast.added": "Added to the reading queue",
+        "add.sourceName": "Manual add",
+        "add.tag": "Manual add",
+        "add.summaryDefault": "A new reading node waiting for a summary and external links.",
+        "add.bodyDefault1": "This manually added reading node can become an entry point for fact-checking, counter-reading, or source organization.",
+        "add.bodyDefault2": "Add primary sources, counterpoints, and long-lived archive links.",
+        "add.original": "Original",
+        "add.sourceNoteDefault": "Added automatically from a manual link.",
+        "sourceType.blog": "Independent site",
+        "sourceType.news": "Media",
+        "sourceType.research": "Research",
+        "sourceType.archive": "Archive",
+        "sourceType.community": "Community",
+        "sourceType.fallback": "Source",
+        "metric.openIndex": "Openness Index",
+        "metric.openDetail": "Higher reads more like the open web",
+        "metric.outlinks": "Link Nodes",
+        "metric.outlinksDetail": "Traceable next jumps",
+        "metric.needsLinks": "Needs Links",
+        "metric.needsLinksDetail": "Missing evidence or sources",
+        "metric.saved": "Saved",
+        "metric.savedDetail": "Personal public memory",
+        "tag.open": "Open {score}",
+        "tag.outlinks": "{count} links",
+        "mini.links": "Links",
+        "mini.evidence": "Evidence",
+        "mini.counter": "Counter",
+        "score.link": "Link generosity",
+        "score.diversity": "Source diversity",
+        "score.primary": "Primary material",
+        "score.contrast": "Viewpoint contrast",
+        "score.independence": "Platform independence",
+        "action.save": "Save",
+        "action.unsave": "Unsave",
+        "action.copy": "Copy",
+        "action.copyBundle": "Copy bundle",
+        "action.buildTrail": "Build trail",
+        "action.add": "Add",
+        "action.clear": "Clear",
+        "toast.saved": "Saved to personal public memory",
+        "toast.unsaved": "Removed from saved items",
+        "toast.savedCurrent": "Current node saved",
+        "toast.copied": "Copied to clipboard",
+        "toast.exported": "Open reading data exported",
+        "copy.trailTitle": "HyperReader Reading Trail",
+        "copy.pendingOutlink": "External link needed",
+        "copy.diagnosisOpenScore": "Open Reading Score: {score}",
+        "copy.diagnosisSlopRisk": "AI Slop Risk: {score}",
+        "copy.diagnosisZeroRisk": "Zero-Click Risk: {score}",
+        "copy.diagnosisActions": "Repair actions:"
+      },
+      ms: {
+        "app.title": "HyperReader | Ruang Kerja Bacaan Pautan Terbuka",
+        "sidebar.aria": "Navigasi utama",
+        "brand.subtitle": "Ruang kerja bacaan pautan terbuka",
+        "nav.workspace": "Ruang Kerja",
+        "nav.queue": "Giliran Bacaan",
+        "nav.reader": "Pembaca Mendalam",
+        "nav.graph": "Graf Pautan",
+        "nav.diagnose": "Diagnosis Teks",
+        "nav.trail": "Laluan Bacaan",
+        "nav.sources": "Pustaka Sumber",
+        "nav.local": "Setempat",
+        "sourceStrip.aria": "Keterbukaan sumber",
+        "mobileMenu.title": "Navigasi",
+        "locale.label": "Bahasa",
+        "search.placeholder": "Cari tajuk, sumber, tag, atau domain pautan",
+        "topbar.diagnose": "Diagnosis Teks",
+        "topbar.add": "Tambah Pautan",
+        "queue.title": "Giliran Bacaan Tanpa Algoritma",
+        "queue.subtitle": "{filtered} nod, {total} jumlah item",
+        "queue.empty": "Tiada nod bacaan yang sepadan",
+        "filter.all": "Semua",
+        "filter.open": "Keterbukaan Tinggi",
+        "filter.needsLinks": "Perlu Pautan",
+        "filter.counter": "Pandangan Lawan",
+        "filter.saved": "Disimpan",
+        "focus.title": "Bacaan Hari Ini",
+        "focus.shuffleTitle": "Segarkan set",
+        "focus.first": "Baca teks utama dahulu dan catat tiga dakwaan yang boleh disahkan",
+        "focus.second": "Kemudian baca sudut berbeza dan tambah satu contoh lawan",
+        "focus.build": "Bina laluan",
+        "focus.buildDetail": "Sambungkan teks asal, bukti, pandangan lawan, dan tindakan",
+        "zero.title": "Amaran Sifar Klik",
+        "zero.riskyNodes": "Nod berisiko tinggi",
+        "zero.missingSources": "Kurang sumber primer",
+        "zero.needsLinks": "Paling perlu pautan",
+        "zero.none": "Tiada",
+        "zero.suggestedAction": "Tindakan dicadang",
+        "zero.actionKinds": "Asal, lawan, arkib",
+        "reader.radar": "Radar Keterbukaan",
+        "reader.linkList": "Pautan Keluar",
+        "reader.next": "Lompatan Seterusnya",
+        "reader.empty": "Giliran bacaan kosong",
+        "reader.noOutlinks": "Nod ini perlu lebih banyak pautan luar",
+        "reader.noRelated": "Tiada lompatan seterusnya dengan tag bersama",
+        "graph.aria": "Graf rangkaian pautan keluar",
+        "graph.legend.blog": "Laman bebas dan blog",
+        "graph.legend.news": "Media dan bahan awam",
+        "graph.legend.research": "Penyelidikan dan arkib",
+        "graph.legend.relation": "Petikan dan hubungan isu",
+        "graph.tooltip": "Keterbukaan {score} · Pautan {links}",
+        "diagnose.shortTitle": "Diagnosis",
+        "diagnose.title": "Diagnosis Teks dan URL",
+        "diagnose.subtitle": "Analisis heuristik setempat",
+        "diagnose.run": "Jalankan Diagnosis",
+        "diagnose.inputLabel": "Kandungan atau pautan",
+        "diagnose.inputPlaceholder": "Tampal siaran, ringkasan berita, AI Overview, hasil carian, atau URL",
+        "diagnose.modeLabel": "Konteks bacaan",
+        "diagnose.mode.feed": "Suapan media sosial",
+        "diagnose.mode.search": "Hasil carian atau ringkasan AI",
+        "diagnose.mode.article": "Rencana panjang atau laporan",
+        "diagnose.mode.chat": "Mesej sembang diteruskan",
+        "diagnose.goalLabel": "Matlamat",
+        "diagnose.goal.verify": "Sahkan fakta",
+        "diagnose.goal.understand": "Fahami isu",
+        "diagnose.goal.debate": "Sedia untuk diskusi",
+        "diagnose.goal.archive": "Susun sumber",
+        "diagnose.resultTitle": "Hasil Diagnosis",
+        "diagnose.waiting": "Menunggu input diagnosis",
+        "diagnose.noClaims": "Tiada ayat dakwaan yang cukup panjang ditemui",
+        "diagnose.openScore": "Skor Bacaan Terbuka",
+        "diagnose.openScoreDetail": "Lebih tinggi lebih mudah dijejaki",
+        "diagnose.slopRisk": "Risiko Kandungan AI",
+        "diagnose.slopRiskDetail": "Sensasi dan sumber hilang",
+        "diagnose.zeroClickRisk": "Risiko Sifar Klik",
+        "diagnose.zeroClickDetail": "Kebarangkalian tidak membuka asal",
+        "diagnose.actionsTitle": "Tindakan Baiki",
+        "diagnose.domainCount": "{count} domain",
+        "diagnose.localAdvice": "Nasihat diagnosis setempat",
+        "diagnose.pendingCheck": "Perlu disahkan",
+        "diagnose.toast.empty": "Tampal kandungan atau URL dahulu",
+        "diagnose.toast.noResult": "Belum ada hasil diagnosis",
+        "diagnose.need.source": "Perlu sumber yang jelas",
+        "diagnose.need.data": "Perlu data primer",
+        "diagnose.need.counter": "Perlu pandangan lawan",
+        "diagnose.need.links": "Perlu sekurang-kurangnya dua pautan luar",
+        "diagnose.need.crossRead": "Perlu bacaan silang",
+        "diagnose.action.addLinks": "Tambah satu pautan primer, kemudian satu pautan pandangan lawan.",
+        "diagnose.action.secondDomain": "Tambah domain bebas kedua untuk elak gelung sumber tunggal.",
+        "diagnose.action.replaceVague": "Ganti atribusi kabur dengan sumber yang boleh dijejaki.",
+        "diagnose.action.trimHype": "Buang istilah sensasi dan kekalkan dakwaan yang boleh disahkan.",
+        "diagnose.action.openOriginal": "Buka halaman asal dan bandingkan ringkasan dengan teks penuh.",
+        "diagnose.action.counter": "Tulis hujah lawan terkuat sebelum kekal dalam gelembung sama.",
+        "diagnose.action.archive": "Kekalkan struktur pautan semasa dan tambah salinan arkib tahan lama.",
+        "trail.title": "Laluan Bacaan Tujuh Langkah",
+        "trail.seedDefault": "Dijana daripada artikel dipilih",
+        "trail.seedLabel": "Mula: {title}",
+        "trail.generate": "Jana",
+        "trail.copyMarkdown": "Salin Markdown",
+        "trail.params": "Parameter Laluan",
+        "trail.topicLabel": "Fokus topik",
+        "trail.topicPlaceholder": "Contoh: web terbuka, ringkasan AI, domain awam",
+        "trail.intensityLabel": "Keamatan laluan",
+        "trail.intensity.normal": "Standard",
+        "trail.intensity.deep": "Bacaan mendalam",
+        "trail.intensity.action": "Tindakan",
+        "trail.preferenceLabel": "Keutamaan sumber",
+        "trail.preference.mixed": "Sumber campuran",
+        "trail.preference.primary": "Sumber primer dahulu",
+        "trail.preference.counter": "Pandangan lawan dahulu",
+        "trail.preference.local": "Komuniti setempat dahulu",
+        "trail.topicFallback": "web terbuka",
+        "trail.note.seed": "Mula: baca teks asal tentang \"{topic}\" sebelum menerima sebarang ringkasan.",
+        "trail.note.primary": "Kembali kepada bahan primer, arkib, rekod mesyuarat, atau data.",
+        "trail.note.research": "Tambah konsep, kaedah, dan konteks penyelidikan; semak batas hujah.",
+        "trail.note.counter": "Cari pandangan lawan terkuat dan elak gelembung algoritma.",
+        "trail.note.weak": "Kenal pasti kandungan kurang pautan dan senaraikan dakwaan yang perlu disahkan.",
+        "trail.note.community": "Masuk ke perbincangan komuniti dan perhatikan pengalaman orang terkesan.",
+        "trail.note.solution": "Jadikannya senarai bacaan yang boleh dikongsi, dikunjungi semula, dan terus ditambah pautan.",
+        "trail.toast.built": "Laluan bacaan tujuh langkah telah dijana",
+        "sources.title": "Pustaka Sumber",
+        "sources.subtitle": "RSS, laman bebas, arkib, bahan awam",
+        "sources.export": "Eksport",
+        "sources.add": "Tambah",
+        "source.openness": "Keterbukaan",
+        "source.toggleAria": "Togol sumber",
+        "source.enabled": "Sumber diaktifkan",
+        "source.paused": "Sumber dijeda",
+        "add.title": "Tambah Pautan atau Sumber",
+        "add.titleLabel": "Tajuk",
+        "add.titlePlaceholder": "Nama artikel, RSS, atau arkib",
+        "add.typeLabel": "Jenis",
+        "add.linksLabel": "Pautan keluar",
+        "add.summaryLabel": "Ringkasan",
+        "add.summaryPlaceholder": "Apakah sudut pandang sumber ini? Ke mana ia membawa pembaca?",
+        "add.submit": "Tambah ke Giliran Bacaan",
+        "add.toast.missing": "Tajuk dan URL diperlukan",
+        "add.toast.added": "Ditambah ke giliran bacaan",
+        "add.sourceName": "Tambah manual",
+        "add.tag": "Tambah manual",
+        "add.summaryDefault": "Nod bacaan baharu yang menunggu ringkasan dan pautan luar.",
+        "add.bodyDefault1": "Nod bacaan yang ditambah manual ini boleh menjadi pintu masuk untuk semakan fakta, bacaan lawan, atau susunan sumber.",
+        "add.bodyDefault2": "Tambah sumber primer, pandangan lawan, dan pautan arkib jangka panjang.",
+        "add.original": "Asal",
+        "add.sourceNoteDefault": "Ditambah automatik daripada pautan manual.",
+        "sourceType.blog": "Laman bebas",
+        "sourceType.news": "Media",
+        "sourceType.research": "Penyelidikan",
+        "sourceType.archive": "Arkib",
+        "sourceType.community": "Komuniti",
+        "sourceType.fallback": "Sumber",
+        "metric.openIndex": "Indeks Keterbukaan",
+        "metric.openDetail": "Lebih tinggi lebih menyerupai web terbuka",
+        "metric.outlinks": "Nod Pautan",
+        "metric.outlinksDetail": "Lompatan seterusnya yang boleh dijejaki",
+        "metric.needsLinks": "Perlu Pautan",
+        "metric.needsLinksDetail": "Kurang bukti atau sumber",
+        "metric.saved": "Disimpan",
+        "metric.savedDetail": "Memori awam peribadi",
+        "tag.open": "Terbuka {score}",
+        "tag.outlinks": "{count} pautan",
+        "mini.links": "Pautan",
+        "mini.evidence": "Bukti",
+        "mini.counter": "Lawan",
+        "score.link": "Kemurahan pautan",
+        "score.diversity": "Kepelbagaian sumber",
+        "score.primary": "Bahan primer",
+        "score.contrast": "Kontras pandangan",
+        "score.independence": "Kebebasan platform",
+        "action.save": "Simpan",
+        "action.unsave": "Nyahsimpan",
+        "action.copy": "Salin",
+        "action.copyBundle": "Salin pakej",
+        "action.buildTrail": "Bina laluan",
+        "action.add": "Tambah",
+        "action.clear": "Kosongkan",
+        "toast.saved": "Disimpan ke memori awam peribadi",
+        "toast.unsaved": "Dikeluarkan daripada item disimpan",
+        "toast.savedCurrent": "Nod semasa disimpan",
+        "toast.copied": "Disalin ke papan klip",
+        "toast.exported": "Data bacaan terbuka dieksport",
+        "copy.trailTitle": "Laluan Bacaan HyperReader",
+        "copy.pendingOutlink": "Pautan luar diperlukan",
+        "copy.diagnosisOpenScore": "Skor Bacaan Terbuka: {score}",
+        "copy.diagnosisSlopRisk": "Risiko Kandungan AI: {score}",
+        "copy.diagnosisZeroRisk": "Risiko Sifar Klik: {score}",
+        "copy.diagnosisActions": "Tindakan baiki:"
+      }
+    };
+
+    const seedSources = [
+      {
+        id: "indie-web",
+        name: "独立博客与个人站",
+        type: "blog",
+        url: "https://indieweb.org",
+        active: true,
+        openness: 92,
+        note: "作者身份清楚，外链慷慨，适合追踪思想脉络。"
+      },
+      {
+        id: "public-records",
+        name: "公共档案与原始资料",
+        type: "archive",
+        url: "https://example.org/public-records",
+        active: true,
+        openness: 88,
+        note: "报告、法案、会议记录、统计资料。"
+      },
+      {
+        id: "civic-media",
+        name: "公民媒体与地方报道",
+        type: "news",
+        url: "https://example.org/civic-media",
+        active: true,
+        openness: 76,
+        note: "补足主流平台忽略的本地事实。"
+      },
+      {
+        id: "research-shelf",
+        name: "论文、白皮书与研究笔记",
+        type: "research",
+        url: "https://example.org/research",
+        active: true,
+        openness: 84,
+        note: "帮助从口号回到概念、数据与方法。"
+      },
+      {
+        id: "forum-commons",
+        name: "论坛、通讯与社区清单",
+        type: "community",
+        url: "https://example.org/community",
+        active: true,
+        openness: 69,
+        note: "保留人与人之间的慢讨论。"
+      }
+    ];
+
+    const seedItems = [
+      {
+        id: "open-hyperlink-soul",
+        title: "开放互联网的灵魂是超级链接",
+        source: "独立博客与个人站",
+        domain: "openweb.local",
+        type: "blog",
+        date: "2026-05-07",
+        links: 18,
+        diversity: 86,
+        primary: 74,
+        contrast: 68,
+        independence: 95,
+        saved: true,
+        read: false,
+        tags: ["开放互联网", "超级链接", "公共领域"],
+        stance: "core",
+        summary: "把网页视为通往其他世界的门，而不是把读者关进单一平台的留存漏斗。",
+        body: [
+          "如果一个页面愿意把你送往其他页面，它就承认知识不是自己的围墙，而是一张互相校正的网。超级链接不是装饰，它是开放互联网最朴素也最激进的制度设计。",
+          "短视频平台、封闭信息流和零点击摘要共同削弱了这个制度。用户得到的是更快的结论，却失去了通往证据、争议、背景和人的路径。",
+          "解决办法不只是怀旧。新的阅读工具必须把出站链接、来源多样性、反方观点和原始资料重新变成界面的中心，而不是藏在推荐算法背后的偶然结果。"
+        ],
+        outlinks: [
+          { label: "原始材料", url: "https://example.org/hyperlink-history", domain: "example.org" },
+          { label: "开放网页标准", url: "https://www.w3.org/", domain: "w3.org" },
+          { label: "独立网页运动", url: "https://indieweb.org/", domain: "indieweb.org" }
+        ]
+      },
+      {
+        id: "zero-click-ai",
+        title: "AI 摘要如何制造零点击阅读习惯",
+        source: "论文、白皮书与研究笔记",
+        domain: "research.local",
+        type: "research",
+        date: "2026-05-06",
+        links: 26,
+        diversity: 78,
+        primary: 90,
+        contrast: 59,
+        independence: 82,
+        saved: false,
+        read: false,
+        tags: ["AI 摘要", "搜索", "零点击"],
+        stance: "analysis",
+        summary: "搜索入口把多源检索压缩成单一摘要后，用户更少进入原始网页，也更难发现摘要遗漏。",
+        body: [
+          "零点击并不只是网站流量问题，它改变了读者与证据之间的距离。摘要看起来像答案，实际上常常只是把多个来源压扁成无法追溯的段落。",
+          "一个健康的搜索界面应该把出处、异议和不确定性放在答案旁边。否则，AI 不是互联网的索引，而会变成新的信息终点站。",
+          "阅读工具可以做相反的事：记录每一次摘要背后的出处，把用户带回原始网页，并提示哪些主张还缺少第一手材料。"
+        ],
+        outlinks: [
+          { label: "搜索结果样本", url: "https://example.org/search-samples", domain: "example.org" },
+          { label: "新闻出版影响研究", url: "https://example.org/publisher-impact", domain: "example.org" },
+          { label: "AI 可追溯性笔记", url: "https://example.org/traceability", domain: "example.org" }
+        ]
+      },
+      {
+        id: "algorithm-ad-machine",
+        title: "从社交平台到广告推送器",
+        source: "公民媒体与地方报道",
+        domain: "civic.local",
+        type: "news",
+        date: "2026-05-05",
+        links: 9,
+        diversity: 54,
+        primary: 46,
+        contrast: 40,
+        independence: 52,
+        saved: false,
+        read: false,
+        tags: ["平台垄断", "广告算法", "社交媒体"],
+        stance: "core",
+        summary: "当朋友动态让位给品牌、网红和广告，社交网络就从连接器变成注意力采矿机器。",
+        body: [
+          "早期社交媒体至少仍保留相当多的外链、博客和论坛入口。如今许多平台把外部链接降权，把用户停留时间当成主要目标。",
+          "公共事务讨论因此变得难以累积。每一个帖子都像被投进短暂的瀑布流，缺少可引用、可回访、可修订的网页结构。",
+          "要恢复讨论能力，工具需要帮助读者把短内容重新连接到长文、资料库、社区记录和行动渠道。"
+        ],
+        outlinks: [
+          { label: "平台设计观察", url: "https://example.org/platform-design", domain: "example.org" }
+        ]
+      },
+      {
+        id: "rss-quiet-infra",
+        title: "RSS 是安静但仍然有效的公共基础设施",
+        source: "独立博客与个人站",
+        domain: "reader.local",
+        type: "blog",
+        date: "2026-05-04",
+        links: 14,
+        diversity: 80,
+        primary: 62,
+        contrast: 71,
+        independence: 91,
+        saved: false,
+        read: false,
+        tags: ["RSS", "订阅", "独立站"],
+        stance: "solution",
+        summary: "RSS 没有推送黑箱，也不追逐留存，它把选择权交还给读者。",
+        body: [
+          "RSS 的朴素之处恰好是它的政治性。你订阅谁、按什么顺序阅读、要不要点开原文，都是用户端的决定。",
+          "它不能自动解决谣言和偏见，但它降低了平台操纵注意力的能力。一个好的阅读器应该把 RSS、手动链接、档案和群聊来源放在同一张个人知识地图里。",
+          "当信息流重新变成可迁移、可导出、可备份的清单，读者才有机会离开围墙，同时不失去公共讨论。"
+        ],
+        outlinks: [
+          { label: "RSS 说明", url: "https://www.rssboard.org/rss-specification", domain: "rssboard.org" },
+          { label: "独立网页目录", url: "https://indieweb.org/", domain: "indieweb.org" }
+        ]
+      },
+      {
+        id: "dark-social",
+        title: "暗社交孤岛不是开放互联网的替代品",
+        source: "论坛、通讯与社区清单",
+        domain: "forum.local",
+        type: "community",
+        date: "2026-05-03",
+        links: 7,
+        diversity: 44,
+        primary: 35,
+        contrast: 65,
+        independence: 74,
+        saved: false,
+        read: false,
+        tags: ["暗社交", "社区", "群聊"],
+        stance: "counter",
+        summary: "群聊和通讯可以保护亲密讨论，却也容易失去公共可见度、索引能力和长期记忆。",
+        body: [
+          "逃离大平台之后，人们常常转向群聊、私密频道和通讯。它们让讨论更有人味，却不一定能承载公共知识。",
+          "暗社交的问题不在于私密，而在于资料难以被引用、校对和传承。许多关键证据只在截图里流转，最后变成无法查证的传闻。",
+          "更好的做法是把私密讨论与可公开的资料节点连接起来，让需要公开的事实重新回到可链接的网页。"
+        ],
+        outlinks: [
+          { label: "社区治理笔记", url: "https://example.org/community-governance", domain: "example.org" }
+        ]
+      },
+      {
+        id: "slop-farm",
+        title: "内容农场与 AI 馊水的共同弱点",
+        source: "公民媒体与地方报道",
+        domain: "media.local",
+        type: "news",
+        date: "2026-05-02",
+        links: 5,
+        diversity: 32,
+        primary: 28,
+        contrast: 24,
+        independence: 48,
+        saved: false,
+        read: false,
+        tags: ["AI 馊水", "SEO", "事实核查"],
+        stance: "needs-links",
+        summary: "它们都擅长制造看似完整的文本，却常常缺少原始出处、责任主体和可追踪的修订记录。",
+        body: [
+          "内容农场追求搜索排名，AI 馊水追求低成本生成。两者的共同结果是文本数量暴涨，可信线索变稀。",
+          "判断这类内容时，不要先问它写得像不像，而要问它把你带向哪里。没有外链、没有作者、没有原始资料的文章，很可能只是信息雾气。",
+          "一个阅读器可以用低技术手段做很多事：检测链接数量、域名多样性、夸张词、无主语断言，并给出补链任务。"
+        ],
+        outlinks: []
+      },
+      {
+        id: "civic-memory",
+        title: "社会运动需要可回访的公共记忆",
+        source: "公共档案与原始资料",
+        domain: "archive.local",
+        type: "archive",
+        date: "2026-05-01",
+        links: 22,
+        diversity: 82,
+        primary: 88,
+        contrast: 70,
+        independence: 80,
+        saved: true,
+        read: false,
+        tags: ["社会运动", "公共记忆", "档案"],
+        stance: "solution",
+        summary: "动员不只靠热度，也靠可引用、可复盘、可传承的资料结构。",
+        body: [
+          "很多公共议题的传播不是突然发生，而是长年累积的结果。博客、论坛、新闻档案和公民组织网页共同保存了论证链条。",
+          "封闭平台擅长制造瞬间热度，却不擅长保留公共记忆。帖子会沉没，账号会消失，链接会被降权，讨论很难沉淀成公共知识。",
+          "开放链接阅读工具的目标，是让每一次阅读都能留下可复用的路径：从观点到证据，从证据到反驳，从反驳到行动。"
+        ],
+        outlinks: [
+          { label: "公共会议记录", url: "https://example.org/minutes", domain: "example.org" },
+          { label: "运动档案", url: "https://example.org/movement-archive", domain: "example.org" }
+        ]
+      }
+    ];
+
+    const saved = loadState();
+    const state = {
+      view: "queue",
+      filter: "all",
+      query: "",
+      locale: saved.locale || "zh-Hans",
+      selectedId: saved.selectedId || seedItems[0].id,
+      focusIndex: saved.focusIndex || 0,
+      sources: saved.sources || seedSources,
+      items: saved.items || seedItems,
+      trail: saved.trail || [],
+      trailLocale: saved.trailLocale || null,
+      lastDiagnosis: saved.lastDiagnosis || null
+    };
+
+    function t(key, params = {}) {
+      const locale = translations[state.locale] ? state.locale : "zh-Hans";
+      const value = translations[locale][key] ?? translations["zh-Hans"][key] ?? key;
+      return String(value).replace(/\{(\w+)\}/g, (_, name) => params[name] ?? "");
+    }
+
+    function applyLocale() {
+      if (!translations[state.locale]) state.locale = "zh-Hans";
+      document.documentElement.lang = state.locale;
+      document.title = t("app.title");
+      byId("localeSelect").value = state.locale;
+      document.querySelectorAll("[data-i18n]").forEach(node => {
+        node.textContent = t(node.dataset.i18n);
+      });
+      document.querySelectorAll("[data-i18n-placeholder]").forEach(node => {
+        node.setAttribute("placeholder", t(node.dataset.i18nPlaceholder));
+      });
+      document.querySelectorAll("[data-i18n-title]").forEach(node => {
+        node.setAttribute("title", t(node.dataset.i18nTitle));
+      });
+      document.querySelectorAll("[data-i18n-aria-label]").forEach(node => {
+        node.setAttribute("aria-label", t(node.dataset.i18nAriaLabel));
+      });
+    }
+
+    function setLocale(locale) {
+      if (!translations[locale]) return;
+      state.locale = locale;
+      persist();
+      renderAll();
+    }
+
+    function loadState() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function persist() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        locale: state.locale,
+        selectedId: state.selectedId,
+        focusIndex: state.focusIndex,
+        sources: state.sources,
+        items: state.items,
+        trail: state.trail,
+        trailLocale: state.trailLocale,
+        lastDiagnosis: state.lastDiagnosis
+      }));
+    }
+
+    function byId(id) {
+      return document.getElementById(id);
+    }
+
+    function currentItem() {
+      return state.items.find(item => item.id === state.selectedId) || state.items[0];
+    }
+
+    function score(item) {
+      const linkScore = Math.min(100, Math.round(item.links * 4.2));
+      return Math.round((linkScore + item.diversity + item.primary + item.contrast + item.independence) / 5);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function domainFromUrl(url) {
+      try {
+        return new URL(url).hostname.replace(/^www\./, "");
+      } catch (error) {
+        return String(url || "").replace(/^https?:\/\//, "").split("/")[0] || "manual.local";
+      }
+    }
+
+    function saveAndRender() {
+      persist();
+      renderAll();
+    }
+
+    function renderAll() {
+      applyLocale();
+      renderNav();
+      renderMetrics();
+      renderFeed();
+      renderReader();
+      renderSources();
+      renderSourceStrip();
+      renderFocus();
+      renderZeroClick();
+      renderTrail();
+      if (state.lastDiagnosis) {
+        renderDiagnosis(state.lastDiagnosis);
+      } else {
+        byId("diagnosisResult").innerHTML = `<div class="empty">${t("diagnose.waiting")}</div>`;
+      }
+      if (state.view === "graph") {
+        requestAnimationFrame(drawGraph);
+      }
+    }
+
+    function renderNav() {
+      document.querySelectorAll(".nav-item").forEach(item => {
+        item.classList.toggle("active", item.dataset.view === state.view);
+      });
+      byId("navQueueCount").textContent = state.items.length;
+      byId("navSavedCount").textContent = state.items.filter(item => item.saved).length;
+      byId("navGraphCount").textContent = state.items.reduce((sum, item) => sum + item.outlinks.length, 0);
+      byId("navTrailCount").textContent = state.trail.length || 7;
+      byId("navSourceCount").textContent = state.sources.filter(source => source.active).length;
+    }
+
+    function renderMetrics() {
+      const items = state.items;
+      const avgOpen = Math.round(items.reduce((sum, item) => sum + score(item), 0) / Math.max(1, items.length));
+      const totalLinks = items.reduce((sum, item) => sum + item.outlinks.length, 0);
+      const needsLinks = items.filter(item => item.links < 8 || item.primary < 45).length;
+      const savedCount = items.filter(item => item.saved).length;
+      const metrics = [
+        [t("metric.openIndex"), avgOpen, t("metric.openDetail")],
+        [t("metric.outlinks"), totalLinks, t("metric.outlinksDetail")],
+        [t("metric.needsLinks"), needsLinks, t("metric.needsLinksDetail")],
+        [t("metric.saved"), savedCount, t("metric.savedDetail")]
+      ];
+      byId("metrics").innerHTML = metrics.map(([label, value, detail], index) => `
+        <article class="metric">
+          <span>${label}</span>
+          <strong style="color:${[sourceColors.blog, sourceColors.news, sourceColors.research, sourceColors.archive][index]}">${value}</strong>
+          <span>${detail}</span>
+        </article>
+      `).join("");
+    }
+
+    function renderFeed() {
+      const query = state.query.trim().toLowerCase();
+      const filtered = state.items
+        .filter(item => {
+          if (state.filter === "open") return score(item) >= 74;
+          if (state.filter === "needs-links") return item.links < 8 || item.primary < 45 || item.stance === "needs-links";
+          if (state.filter === "counter") return item.stance === "counter" || item.contrast >= 64;
+          if (state.filter === "saved") return item.saved;
+          return true;
+        })
+        .filter(item => {
+          if (!query) return true;
+          const haystack = [
+            item.title,
+            item.source,
+            item.domain,
+            item.summary,
+            item.tags.join(" "),
+            item.outlinks.map(link => link.domain).join(" ")
+          ].join(" ").toLowerCase();
+          return haystack.includes(query);
+        })
+        .sort((a, b) => score(b) - score(a));
+
+      byId("queueSubtitle").textContent = t("queue.subtitle", { filtered: filtered.length, total: state.items.length });
+      byId("feed").innerHTML = filtered.length ? filtered.map(articleCard).join("") : `<div class="empty">${t("queue.empty")}</div>`;
+    }
+
+    function articleCard(item) {
+      const itemScore = score(item);
+      const tagClass = itemScore > 75 ? "green" : itemScore < 52 ? "rust" : "blue";
+      return `
+        <article class="article-card ${item.id === state.selectedId ? "selected" : ""}" onclick="showReader('${item.id}')">
+          <div>
+            <div class="meta">
+              <span class="dot" style="background:${sourceColors[item.type] || sourceColors.blog}"></span>
+              <span>${escapeHtml(item.source)}</span>
+              <span>${escapeHtml(item.domain)}</span>
+              <span>${escapeHtml(item.date)}</span>
+            </div>
+            <h3 class="article-title">${escapeHtml(item.title)}</h3>
+            <p class="summary">${escapeHtml(item.summary)}</p>
+            <div class="tag-row">
+              <span class="tag ${tagClass}">${t("tag.open", { score: itemScore })}</span>
+              <span class="tag">${t("tag.outlinks", { count: item.links })}</span>
+              ${item.tags.slice(0, 3).map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}
+            </div>
+          </div>
+          <div class="score-stack">
+            ${miniScore(t("mini.links"), Math.min(100, item.links * 4.2), sourceColors.blog)}
+            ${miniScore(t("mini.evidence"), item.primary, sourceColors.research)}
+            ${miniScore(t("mini.counter"), item.contrast, sourceColors.news)}
+            <div class="toolbar" onclick="event.stopPropagation()">
+              <button class="icon-btn" onclick="toggleSave('${item.id}')" title="${item.saved ? t("action.unsave") : t("action.save")}">
+                <i class="ti ${item.saved ? "ti-bookmark-filled" : "ti-bookmark"}" aria-hidden="true"></i>
+              </button>
+              <button class="icon-btn" onclick="buildTrail('${item.id}')" title="${t("action.buildTrail")}">
+                <i class="ti ti-route" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function miniScore(label, value, color) {
+      const pct = Math.max(0, Math.min(100, Math.round(value)));
+      return `
+        <div class="mini-score">
+          <span><em>${label}</em><em>${pct}</em></span>
+          <div class="bar"><b style="width:${pct}%;background:${color}"></b></div>
+        </div>
+      `;
+    }
+
+    function renderReader() {
+      const item = currentItem();
+      if (!item) {
+        byId("readerArticle").innerHTML = `<div class="empty">${t("reader.empty")}</div>`;
+        return;
+      }
+      byId("readerArticle").innerHTML = `
+        <div class="meta">
+          <span class="dot" style="background:${sourceColors[item.type] || sourceColors.blog}"></span>
+          <span>${escapeHtml(item.source)}</span>
+          <span>${escapeHtml(item.domain)}</span>
+          <span>${escapeHtml(item.date)}</span>
+        </div>
+        <h1>${escapeHtml(item.title)}</h1>
+        <p class="lead">${escapeHtml(item.summary)}</p>
+        ${item.body.map(paragraph => `<p>${escapeHtml(paragraph)}</p>`).join("")}
+        <div class="tag-row">
+          ${item.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}
+        </div>
+      `;
+
+      const scoreRows = [
+        [t("score.link"), Math.min(100, item.links * 4.2), sourceColors.blog],
+        [t("score.diversity"), item.diversity, sourceColors.news],
+        [t("score.primary"), item.primary, sourceColors.research],
+        [t("score.contrast"), item.contrast, sourceColors.archive],
+        [t("score.independence"), item.independence, sourceColors.community]
+      ];
+      byId("readerScores").innerHTML = scoreRows.map(([label, value, color]) => `
+        <div class="score-row">
+          <label><span>${label}</span><b>${Math.round(value)}</b></label>
+          <div class="bar"><b style="width:${Math.min(100, value)}%;background:${color}"></b></div>
+        </div>
+      `).join("");
+
+      byId("readerLinks").innerHTML = item.outlinks.length ? item.outlinks.map(link => `
+        <a class="link-item" href="${escapeHtml(link.url)}" target="_blank" rel="noreferrer">
+          <i class="ti ti-external-link" aria-hidden="true"></i>
+          <span><strong>${escapeHtml(link.label)}</strong><span>${escapeHtml(link.domain)}</span></span>
+        </a>
+      `).join("") : `<div class="empty">${t("reader.noOutlinks")}</div>`;
+
+      const related = state.items
+        .filter(other => other.id !== item.id && other.tags.some(tag => item.tags.includes(tag)))
+        .slice(0, 4);
+      byId("nextLinks").innerHTML = related.length ? `
+        <div class="link-list">
+          ${related.map(other => `
+            <button class="link-item" onclick="showReader('${other.id}')" style="text-align:left">
+              <i class="ti ti-arrow-up-right" aria-hidden="true"></i>
+              <span><strong>${escapeHtml(other.title)}</strong><span>${escapeHtml(other.tags.join(" / "))}</span></span>
+            </button>
+          `).join("")}
+        </div>
+      ` : `<div class="empty">${t("reader.noRelated")}</div>`;
+    }
+
+    function renderSourceStrip() {
+      const activeSources = state.sources.filter(source => source.active);
+      byId("sourceStrip").innerHTML = activeSources.map(source => `
+        <div class="source-row">
+          <span class="dot" style="background:${sourceColors[source.type] || sourceColors.blog}"></span>
+          <span>${escapeHtml(source.name)}</span>
+          <strong>${source.openness}</strong>
+        </div>
+      `).join("");
+    }
+
+    function renderFocus() {
+      const ordered = [...state.items].sort((a, b) => b.contrast + b.primary - (a.contrast + a.primary));
+      const focus = ordered[state.focusIndex % ordered.length];
+      if (!focus) return;
+      const second = ordered[(state.focusIndex + 2) % ordered.length] || focus;
+      byId("focusPanel").innerHTML = `
+        <div class="link-list">
+          <button class="link-item" onclick="showReader('${focus.id}')" style="text-align:left">
+            <i class="ti ti-book" aria-hidden="true"></i>
+            <span><strong>${escapeHtml(focus.title)}</strong><span>${t("focus.first")}</span></span>
+          </button>
+          <button class="link-item" onclick="showReader('${second.id}')" style="text-align:left">
+            <i class="ti ti-arrows-left-right" aria-hidden="true"></i>
+            <span><strong>${escapeHtml(second.title)}</strong><span>${t("focus.second")}</span></span>
+          </button>
+          <button class="link-item" onclick="buildTrail('${focus.id}')" style="text-align:left">
+            <i class="ti ti-route" aria-hidden="true"></i>
+            <span><strong>${t("focus.build")}</strong><span>${t("focus.buildDetail")}</span></span>
+          </button>
+        </div>
+      `;
+    }
+
+    function renderZeroClick() {
+      const risky = state.items.filter(item => item.links < 8 || item.primary < 45);
+      const top = risky[0] || state.items[0];
+      byId("zeroClickPanel").innerHTML = `
+        <div class="diagnosis">
+          <div class="diagnosis-cell">
+            <span>${t("zero.riskyNodes")}</span>
+            <strong style="color:${sourceColors.research}">${risky.length}</strong>
+            <span>${t("zero.missingSources")}</span>
+          </div>
+          <div class="diagnosis-cell">
+            <span>${t("zero.needsLinks")}</span>
+            <strong style="color:${sourceColors.news}">${top ? top.links : 0}</strong>
+            <span>${top ? escapeHtml(top.title.slice(0, 12)) : t("zero.none")}</span>
+          </div>
+          <div class="diagnosis-cell">
+            <span>${t("zero.suggestedAction")}</span>
+            <strong style="color:${sourceColors.blog}">3</strong>
+            <span>${t("zero.actionKinds")}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSources() {
+      byId("sourceGrid").innerHTML = state.sources.map(source => `
+        <article class="source-card">
+          <header>
+            <span class="dot" style="background:${sourceColors[source.type] || sourceColors.blog}"></span>
+            <h3>${escapeHtml(source.name)}</h3>
+            <button class="toggle ${source.active ? "on" : ""}" onclick="toggleSource('${source.id}')" aria-label="${t("source.toggleAria")}"></button>
+          </header>
+          <p>${escapeHtml(source.url)}</p>
+          <div class="score-row">
+            <label><span>${t("source.openness")}</span><b>${source.openness}</b></label>
+            <div class="bar"><b style="width:${source.openness}%;background:${sourceColors[source.type] || sourceColors.blog}"></b></div>
+          </div>
+          <p>${escapeHtml(source.note)}</p>
+        </article>
+      `).join("");
+    }
+
+    function renderTrail() {
+      if (!state.trail.length || state.trailLocale !== state.locale) {
+        buildTrail(state.selectedId, false);
+      }
+      const seed = currentItem();
+      byId("trailSeedLabel").textContent = seed ? t("trail.seedLabel", { title: seed.title }) : t("trail.seedDefault");
+      byId("trailList").innerHTML = state.trail.map((step, index) => `
+        <article class="trail-step">
+          <b>${index + 1}</b>
+          <div>
+            <h3>${escapeHtml(step.title)}</h3>
+            <p>${escapeHtml(step.note)}</p>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function showView(view) {
+      state.view = view;
+      document.querySelectorAll(".view").forEach(node => node.classList.toggle("active", node.id === `view-${view}`));
+      document.body.classList.remove("menu-open");
+      renderNav();
+      if (view === "graph") {
+        requestAnimationFrame(drawGraph);
+      }
+      persist();
+    }
+
+    function showReader(id) {
+      if (id) state.selectedId = id;
+      const item = currentItem();
+      if (item) item.read = true;
+      showView("reader");
+      renderReader();
+      renderFeed();
+      persist();
+    }
+
+    function handleSearch(value) {
+      state.query = value;
+      renderFeed();
+    }
+
+    function setFilter(filter) {
+      state.filter = filter;
+      document.querySelectorAll("[data-filter]").forEach(chip => chip.classList.toggle("on", chip.dataset.filter === filter));
+      renderFeed();
+      persist();
+    }
+
+    function toggleSave(id) {
+      const item = state.items.find(entry => entry.id === id);
+      if (!item) return;
+      item.saved = !item.saved;
+      toast(item.saved ? t("toast.saved") : t("toast.unsaved"));
+      saveAndRender();
+    }
+
+    function saveSelected() {
+      const item = currentItem();
+      if (!item) return;
+      item.saved = true;
+      toast(t("toast.savedCurrent"));
+      saveAndRender();
+    }
+
+    function reshuffleFocus() {
+      state.focusIndex += 1;
+      renderFocus();
+      persist();
+    }
+
+    function toggleSource(id) {
+      const source = state.sources.find(entry => entry.id === id);
+      if (!source) return;
+      source.active = !source.active;
+      toast(source.active ? t("source.enabled") : t("source.paused"));
+      saveAndRender();
+    }
+
+    function showQuickAdd() {
+      showView("sources");
+      setTimeout(() => byId("addTitle").focus(), 50);
+    }
+
+    function resetQuickAdd() {
+      ["addTitle", "addUrl", "addSummary"].forEach(id => byId(id).value = "");
+      byId("addLinks").value = 3;
+      byId("addType").value = "blog";
+    }
+
+    function addItem() {
+      const title = byId("addTitle").value.trim();
+      const url = byId("addUrl").value.trim();
+      const summary = byId("addSummary").value.trim();
+      const type = byId("addType").value;
+      const links = Number(byId("addLinks").value || 0);
+      if (!title || !url) {
+        toast(t("add.toast.missing"));
+        return;
+      }
+      const domain = domainFromUrl(url);
+      const id = `manual-${Date.now()}`;
+      const item = {
+        id,
+        title,
+        source: t("add.sourceName"),
+        domain,
+        type,
+        date: new Date().toISOString().slice(0, 10),
+        links,
+        diversity: Math.min(92, 38 + links * 5),
+        primary: Math.min(88, 30 + links * 6),
+        contrast: Math.min(80, 28 + links * 4),
+        independence: /facebook|instagram|tiktok|x\.com|youtube|wechat|weibo/i.test(domain) ? 32 : 78,
+        saved: false,
+        read: false,
+        tags: [t("add.tag"), typeName(type)],
+        stance: links < 4 ? "needs-links" : "manual",
+        summary: summary || t("add.summaryDefault"),
+        body: [
+          summary || t("add.bodyDefault1"),
+          t("add.bodyDefault2")
+        ],
+        outlinks: [{ label: t("add.original"), url, domain }]
+      };
+      state.items.unshift(item);
+      state.selectedId = id;
+      if (!state.sources.some(source => source.url === url || source.name === domain)) {
+        state.sources.push({
+          id: `source-${Date.now()}`,
+          name: domain,
+          type,
+          url,
+          active: true,
+          openness: score(item),
+          note: summary || t("add.sourceNoteDefault")
+        });
+      }
+      resetQuickAdd();
+      toast(t("add.toast.added"));
+      saveAndRender();
+      showReader(id);
+    }
+
+    function typeName(type) {
+      return {
+        blog: t("sourceType.blog"),
+        news: t("sourceType.news"),
+        research: t("sourceType.research"),
+        archive: t("sourceType.archive"),
+        community: t("sourceType.community")
+      }[type] || t("sourceType.fallback");
+    }
+
+    function runDiagnosis() {
+      const input = byId("diagnosisInput").value.trim();
+      if (!input) {
+        toast(t("diagnose.toast.empty"));
+        return;
+      }
+      const urls = input.match(/https?:\/\/[^\s，。！？)）]+/g) || [];
+      const domains = [...new Set(urls.map(domainFromUrl))];
+      const sentences = input
+        .split(/[。！？!?;\n]/)
+        .map(sentence => sentence.trim())
+        .filter(sentence => sentence.length > 10)
+        .slice(0, 8);
+      const hypeWords = ["震惊", "內幕", "内幕", "所有人", "绝对", "絕對", "彻底", "徹底", "唯一", "马上", "馬上", "不得不", "惊天", "驚天", "反转", "反轉", "必看", "封杀", "封殺", "shocking", "exclusive", "must see", "everyone", "absolute", "right now", "tergempar", "eksklusif", "wajib baca"];
+      const vagueWords = ["据说", "據說", "有人指出", "专家表示", "專家表示", "网传", "網傳", "消息称", "消息稱", "内部人士", "內部人士", "研究显示", "研究顯示", "大家都知道", "experts say", "sources say", "it is said", "reportedly", "viral claim", "pakar berkata", "sumber berkata", "dikatakan", "menurut sumber"];
+      const platformWords = ["小铃铛", "小鈴鐺", "关注", "關注", "带货", "帶貨", "爆款", "流量", "算法推荐", "演算法推薦", "种草", "種草", "转发", "轉發", "subscribe", "like and share", "viral", "algorithm recommends", "follow", "ikuti", "kongsi", "viral", "algoritma mencadangkan"];
+      const hypeCount = hypeWords.filter(word => input.includes(word)).length;
+      const vagueCount = vagueWords.filter(word => input.includes(word)).length;
+      const platformCount = platformWords.filter(word => input.includes(word)).length;
+      const linkDensity = Math.min(100, Math.round((urls.length / Math.max(1, sentences.length)) * 100));
+      const sourceDiversity = Math.min(100, domains.length * 25);
+      const slopRisk = Math.max(0, Math.min(100, 42 + hypeCount * 11 + vagueCount * 12 + platformCount * 8 - urls.length * 8 - domains.length * 6));
+      const zeroClickRisk = Math.max(0, Math.min(100, 72 - urls.length * 12 - domains.length * 8 + vagueCount * 8));
+      const openScore = Math.max(0, Math.min(100, 100 - Math.round((slopRisk + zeroClickRisk) / 2) + Math.round((linkDensity + sourceDiversity) / 5)));
+      const claims = sentences.map(sentence => ({
+        text: sentence,
+        need: classifyClaim(sentence, urls.length, vagueWords)
+      }));
+      const mode = byId("diagnosisMode").value;
+      const goal = byId("diagnosisGoal").value;
+      state.lastDiagnosis = {
+        openScore,
+        slopRisk,
+        zeroClickRisk,
+        linkDensity,
+        sourceDiversity,
+        domains,
+        claims,
+        urls,
+        mode,
+        goal,
+        actions: buildDiagnosisActions({ urls, domains, hypeCount, vagueCount, platformCount, mode, goal })
+      };
+      renderDiagnosis(state.lastDiagnosis);
+      persist();
+    }
+
+    function classifyClaim(sentence, urlCount, vagueWords) {
+      const lower = sentence.toLowerCase();
+      if (vagueWords.some(word => lower.includes(word.toLowerCase()))) return t("diagnose.need.source");
+      if (/数据|數據|比例|增长|增長|下降|研究|报告|報告|调查|調查|统计|統計|data|percent|study|report|survey|statistic|kajian|laporan|tinjauan|statistik/i.test(sentence)) return t("diagnose.need.data");
+      if (/应该|應該|必须|必須|不能|未来|未來|将会|將會|导致|導致|证明|證明|should|must|cannot|future|will|cause|prove|patut|mesti|tidak boleh|masa depan|akan|menyebabkan|membuktikan/i.test(sentence)) return t("diagnose.need.counter");
+      if (urlCount === 0) return t("diagnose.need.links");
+      return t("diagnose.need.crossRead");
+    }
+
+    function buildDiagnosisActions(context) {
+      const actions = [];
+      if (!context.urls.length) actions.push(t("diagnose.action.addLinks"));
+      if (context.domains.length < 2) actions.push(t("diagnose.action.secondDomain"));
+      if (context.vagueCount) actions.push(t("diagnose.action.replaceVague"));
+      if (context.hypeCount || context.platformCount) actions.push(t("diagnose.action.trimHype"));
+      if (context.mode === "search") actions.push(t("diagnose.action.openOriginal"));
+      if (context.goal === "debate") actions.push(t("diagnose.action.counter"));
+      if (!actions.length) actions.push(t("diagnose.action.archive"));
+      return actions;
+    }
+
+    function renderDiagnosis(result) {
+      const claimHtml = result.claims.length ? result.claims.map(claim => `
+        <div class="claim">
+          <div>
+            <p>${escapeHtml(claim.text)}</p>
+            <em>${escapeHtml(claim.need)}</em>
+          </div>
+          <span class="tag rust">${t("diagnose.pendingCheck")}</span>
+        </div>
+      `).join("") : `<div class="empty">${t("diagnose.noClaims")}</div>`;
+      byId("diagnosisResult").innerHTML = `
+        <div class="diagnosis">
+          <div class="diagnosis-cell">
+            <span>${t("diagnose.openScore")}</span>
+            <strong style="color:${sourceColors.blog}">${result.openScore}</strong>
+            <span>${t("diagnose.openScoreDetail")}</span>
+          </div>
+          <div class="diagnosis-cell">
+            <span>${t("diagnose.slopRisk")}</span>
+            <strong style="color:${sourceColors.research}">${result.slopRisk}</strong>
+            <span>${t("diagnose.slopRiskDetail")}</span>
+          </div>
+          <div class="diagnosis-cell">
+            <span>${t("diagnose.zeroClickRisk")}</span>
+            <strong style="color:${sourceColors.news}">${result.zeroClickRisk}</strong>
+            <span>${t("diagnose.zeroClickDetail")}</span>
+          </div>
+        </div>
+        <div class="action-box">
+          <div>
+            <h3>${t("diagnose.actionsTitle")}</h3>
+            <small>${t("diagnose.domainCount", { count: result.domains.length })}</small>
+          </div>
+          <div class="link-list">
+            ${result.actions.map(action => `
+              <div class="link-item">
+                <i class="ti ti-check" aria-hidden="true"></i>
+                <span><strong>${escapeHtml(action)}</strong><span>${t("diagnose.localAdvice")}</span></span>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+        <div class="claim-list">${claimHtml}</div>
+      `;
+    }
+
+    function buildTrailFromSelected() {
+      buildTrail(state.selectedId);
+    }
+
+    function buildTrail(seedId, shouldToast = true) {
+      const seed = state.items.find(item => item.id === seedId) || currentItem();
+      if (!seed) return;
+      const topic = byId("trailTopic")?.value.trim() || seed.tags[0] || t("trail.topicFallback");
+      const all = [...state.items];
+      const primary = all.find(item => item.type === "archive" || item.primary >= 85) || seed;
+      const research = all.find(item => item.type === "research" && item.id !== seed.id) || primary;
+      const counter = all.find(item => item.stance === "counter" || item.contrast >= 70) || seed;
+      const community = all.find(item => item.type === "community") || counter;
+      const weak = all.find(item => item.stance === "needs-links" || item.links < 8) || seed;
+      const solution = all.find(item => item.stance === "solution") || seed;
+      state.trail = [
+        { title: seed.title, note: t("trail.note.seed", { topic }) },
+        { title: primary.title, note: t("trail.note.primary") },
+        { title: research.title, note: t("trail.note.research") },
+        { title: counter.title, note: t("trail.note.counter") },
+        { title: weak.title, note: t("trail.note.weak") },
+        { title: community.title, note: t("trail.note.community") },
+        { title: solution.title, note: t("trail.note.solution") }
+      ];
+      state.trailLocale = state.locale;
+      byId("trailSeedLabel").textContent = t("trail.seedLabel", { title: seed.title });
+      persist();
+      if (shouldToast) {
+        showView("trail");
+        renderTrail();
+        toast(t("trail.toast.built"));
+      }
+    }
+
+    function copyTrailMarkdown() {
+      const text = state.trail.map((step, index) => `${index + 1}. ${step.title}\n   ${step.note}`).join("\n");
+      copyText(`# ${t("copy.trailTitle")}\n\n${text}`);
+    }
+
+    function copyLinkBundle() {
+      const item = currentItem();
+      if (!item) return;
+      const links = item.outlinks.map(link => `- ${link.label}: ${link.url}`).join("\n") || `- ${t("copy.pendingOutlink")}`;
+      copyText(`# ${item.title}\n\n${item.summary}\n\n${links}`);
+    }
+
+    function copyDiagnosis() {
+      if (!state.lastDiagnosis) {
+        toast(t("diagnose.toast.noResult"));
+        return;
+      }
+      const result = state.lastDiagnosis;
+      const text = [
+        t("copy.diagnosisOpenScore", { score: result.openScore }),
+        t("copy.diagnosisSlopRisk", { score: result.slopRisk }),
+        t("copy.diagnosisZeroRisk", { score: result.zeroClickRisk }),
+        "",
+        t("copy.diagnosisActions"),
+        ...result.actions.map(action => `- ${action}`)
+      ].join("\n");
+      copyText(text);
+    }
+
+    function copyText(text) {
+      navigator.clipboard?.writeText(text)
+        .then(() => toast(t("toast.copied")))
+        .catch(() => {
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand("copy");
+          textarea.remove();
+          toast(t("toast.copied"));
+        });
+    }
+
+    function exportData() {
+      const data = JSON.stringify({
+        exportedAt: new Date().toISOString(),
+        sources: state.sources,
+        items: state.items,
+        trail: state.trail
+      }, null, 2);
+      const blob = new Blob([data], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "hyperreader-openweb.json";
+      link.click();
+      URL.revokeObjectURL(url);
+      toast(t("toast.exported"));
+    }
+
+    function toggleMenu() {
+      document.body.classList.toggle("menu-open");
+    }
+
+    function toast(message) {
+      const node = byId("toast");
+      node.textContent = message;
+      node.classList.add("show");
+      clearTimeout(toast.timer);
+      toast.timer = setTimeout(() => node.classList.remove("show"), 2200);
+    }
+
+    function drawGraph() {
+      const canvas = byId("linkCanvas");
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      const width = Math.max(360, Math.floor(rect.width));
+      const height = 560;
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.height = `${height}px`;
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, width, height);
+
+      const nodes = state.items.map((item, index) => {
+        const angle = (Math.PI * 2 * index) / state.items.length - Math.PI / 2;
+        const radiusX = width * 0.34;
+        const radiusY = height * 0.32;
+        return {
+          id: item.id,
+          title: item.title,
+          x: width / 2 + Math.cos(angle) * radiusX,
+          y: height / 2 + Math.sin(angle) * radiusY,
+          r: 12 + Math.min(20, item.links * 0.55),
+          color: sourceColors[item.type] || sourceColors.blog,
+          item
+        };
+      });
+
+      ctx.lineWidth = 1;
+      state.items.forEach((item, index) => {
+        item.outlinks.forEach((link, linkIndex) => {
+          const from = nodes[index];
+          const targetIndex = Math.abs(hashCode(link.domain)) % nodes.length;
+          const to = nodes[targetIndex];
+          if (!from || !to || from === to) return;
+          ctx.beginPath();
+          ctx.moveTo(from.x, from.y);
+          const midX = (from.x + to.x) / 2 + (linkIndex % 2 ? 26 : -26);
+          const midY = (from.y + to.y) / 2 + (linkIndex % 2 ? -18 : 18);
+          ctx.quadraticCurveTo(midX, midY, to.x, to.y);
+          ctx.strokeStyle = "rgba(80, 72, 62, 0.22)";
+          ctx.stroke();
+        });
+      });
+
+      nodes.forEach(node => {
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.r, 0, Math.PI * 2);
+        ctx.fillStyle = `${node.color}33`;
+        ctx.fill();
+        ctx.lineWidth = node.id === state.selectedId ? 3 : 1.5;
+        ctx.strokeStyle = node.color;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, Math.max(3, node.r * 0.32), 0, Math.PI * 2);
+        ctx.fillStyle = node.color;
+        ctx.fill();
+
+        ctx.fillStyle = "#242321";
+        ctx.font = "12px ui-sans-serif, system-ui, sans-serif";
+        ctx.textAlign = "center";
+        wrapCanvasText(ctx, node.title, node.x, node.y + node.r + 16, Math.min(150, width * 0.25), 15);
+      });
+
+      canvas.onmousemove = event => {
+        const bounds = canvas.getBoundingClientRect();
+        const x = event.clientX - bounds.left;
+        const y = event.clientY - bounds.top;
+        const hit = nodes.find(node => Math.hypot(node.x - x, node.y - y) <= node.r + 6);
+        const tip = byId("graphTip");
+        if (hit) {
+          tip.style.display = "block";
+          tip.style.left = `${Math.min(width - 270, x + 12)}px`;
+          tip.style.top = `${Math.max(12, y - 36)}px`;
+          tip.innerHTML = `<strong>${escapeHtml(hit.title)}</strong><br><span style="color:var(--muted)">${t("graph.tooltip", { score: score(hit.item), links: hit.item.links })}</span>`;
+          canvas.style.cursor = "pointer";
+        } else {
+          tip.style.display = "none";
+          canvas.style.cursor = "default";
+        }
+      };
+
+      canvas.onclick = event => {
+        const bounds = canvas.getBoundingClientRect();
+        const x = event.clientX - bounds.left;
+        const y = event.clientY - bounds.top;
+        const hit = nodes.find(node => Math.hypot(node.x - x, node.y - y) <= node.r + 6);
+        if (hit) showReader(hit.id);
+      };
+    }
+
+    function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight) {
+      const chars = text.split("");
+      let line = "";
+      let lines = [];
+      chars.forEach(char => {
+        const testLine = line + char;
+        if (ctx.measureText(testLine).width > maxWidth && line) {
+          lines.push(line);
+          line = char;
+        } else {
+          line = testLine;
+        }
+      });
+      lines.push(line);
+      lines.slice(0, 2).forEach((entry, index) => ctx.fillText(index === 1 && lines.length > 2 ? `${entry.slice(0, -1)}…` : entry, x, y + index * lineHeight));
+    }
+
+    function hashCode(value) {
+      return String(value).split("").reduce((hash, char) => ((hash << 5) - hash) + char.charCodeAt(0), 0);
+    }
+
+    window.addEventListener("resize", () => {
+      if (state.view === "graph") drawGraph();
+    });
+
+    renderAll();
+  </script>
+</body>
+</html>
