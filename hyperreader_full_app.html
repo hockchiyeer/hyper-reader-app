@@ -1395,7 +1395,8 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const STORAGE_KEY = "hyperreader.openweb.v2";
+    const STORAGE_KEY = "hyperreader.openweb";
+    const LEGACY_STORAGE_KEY = "hyperreader.openweb.v2";
     const sourceColors = {
       blog: "#21745c",
       news: "#245e8f",
@@ -2445,7 +2446,15 @@
 
     function loadState() {
       try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+        const current = localStorage.getItem(STORAGE_KEY);
+        if (current) return JSON.parse(current) || {};
+
+        const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+        if (!legacy) return {};
+
+        const parsed = JSON.parse(legacy) || {};
+        localStorage.setItem(STORAGE_KEY, legacy);
+        return parsed;
       } catch (error) {
         return {};
       }

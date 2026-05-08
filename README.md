@@ -108,7 +108,7 @@ hyperreader_full_app.html
 │
 └── JavaScript (lines 1397–3257)
     ├── Data layer
-    │   ├── STORAGE_KEY = "hyperreader.openweb.v2"
+    │   ├── STORAGE_KEY = "hyperreader.openweb"
     │   ├── translations{}           — 4 locales × ~95 keys each
     │   ├── seedSources[]            — 5 pre-loaded sources
     │   └── seedItems[]              — 7 pre-loaded articles
@@ -192,9 +192,9 @@ Switch language using the **globe icon selector** in the top toolbar.
 | `en` | English | ✅ |
 | `ms` | Malay | ✅ |
 
-The selected locale is saved in `localStorage` under the `hyperreader.openweb.v2` key and restored on every page load.
+The selected locale is saved in `localStorage` under the `hyperreader.openweb` key and restored on every page load.
 
-中文说明：语言选择会保存到 `localStorage` 的 `hyperreader.openweb.v2` 键中，下次打开或刷新页面时自动恢复。
+中文说明：语言选择会保存到 `localStorage` 的 `hyperreader.openweb` 键中，下次打开或刷新页面时自动恢复。
 
 **How localisation works:**
 
@@ -222,7 +222,7 @@ To add new translatable strings: add `data-i18n="your.key"` (or `data-i18n-place
 
 ## localStorage Schema / 本地存储结构
 
-All state is stored as a single JSON blob under key `hyperreader.openweb.v2`:
+All state is stored as a single JSON blob under key `hyperreader.openweb`:
 
 中文说明：应用状态会集中保存在一个 JSON 对象中，方便导出、调试和重置。
 
@@ -268,7 +268,7 @@ To **reset** the workspace, clear the key:
 中文说明：如需重置工作台，清除这个 localStorage key 即可。
 
 ```js
-localStorage.removeItem("hyperreader.openweb.v2");
+localStorage.removeItem("hyperreader.openweb");
 ```
 
 ---
